@@ -7,12 +7,22 @@ Dependency-free plain JavaScript module for WCAG compliant tablists
 
 [Try out the examples](https://mynamesleon.github.io/aria-tablist/examples/)
 
+Key design goals and features are:
+
+-   **multi and single select modes**
+-   **horizontal and vertical modes**: Adjusts arrow key usage for moving focus between tabs
+-   **progressive enhancement**: Allows for only the tab and panel relationship to be indicated in the DOM, and adds `role` and `aria` attributes automatically as needed
+-   **accessibility**: Follows the WCAG spec
+-   **compatibility**: Broad browser and device support (IE9+)
+-   **starting states**: Can use `aria-selected="true"` to indicate which tab(s) should be enabled by default.
+-   **deletion**: Can enable tab (and panel) deletion
+
 ## Installation / usage
 
 Grab from NPM and use in a module system:
 
 ```
-npm install aria-autocomplete
+npm install aria-tablist
 ```
 
 ```javascript
@@ -26,7 +36,7 @@ Or grab the minified JavaScript from unpkg:
 <script src="https://unpkg.com/aria-tablist/dist/aria-tablist.min.js"></script>
 ```
 
-## HTML Requirements
+## HTML Requirements / Progressive Enhancement
 
 When the module is called on an element, the following steps are taken:
 
@@ -42,23 +52,31 @@ This means your HTML only needs to indicate the relationship between the tabs an
 
 ```html
 <div id="tabs">
-    <div aria-controls="panel-1">Panel 1</div>
-    <div aria-controls="panel-2">Panel 2</div>
-    <div aria-controls="panel-3">Panel 3</div>
+    <div id="tab-1">Panel 1</div>
+    <div id="tab-2">Panel 2</div>
+    <div id="tab-3">Panel 3</div>
 </div>
 
-<div id="panel-1">...</div>
-<div id="panel-2">...</div>
-<div id="panel-3">...</div>
+<div aria-labelledby="tab-1">...</div>
+<div aria-labelledby="tab-2">...</div>
+<div aria-labelledby="tab-3">...</div>
 ```
 
-Or you can be include all of the optimal ARIA attributes straight away, including indicating which tab should be active by default.
+So if you need to cater for users without JavaScript, or if the JavaScript fails to load for whatever reason, there won't be any applicable roles set that would confuse a screen reader user.
+
+You can of course include all of the optimal ARIA attributes straight away if you wish, including indicating which tab should be active by default:
 
 ```html
 <div id="tabs" role="tablist" aria-label="Tabs">
-    <div role="tab" tabindex="-1" aria-controls="panel-1" id="tab-1">Panel 1</div>
-    <div role="tab" tabindex="0" aria-selected="true" aria-controls="panel-2" id="tab-2">Panel 2</div>
-    <div role="tab" tabindex="-1" aria-controls="panel-3" id="tab-3">Panel 3</div>
+    <div role="tab" tabindex="-1" aria-controls="panel-1" id="tab-1">
+        Panel 1
+    </div>
+    <div role="tab" tabindex="0" aria-selected="true" aria-controls="panel-2" id="tab-2">
+        Panel 2
+    </div>
+    <div role="tab" tabindex="-1" aria-controls="panel-3" id="tab-3">
+        Panel 3
+    </div>
 </div>
 
 <div role="tabpanel" aria-labelledby="tab-1" hidden="hidden" id="panel-1">...</div>
@@ -93,8 +111,60 @@ Most of the functionality is assumed from the included ARIA attributes in your H
     onClose: (panel) => {},
 
     /**
+     * @description callback when a tab is deleted
+     */
+    onDelete: (tab) => {},
+
+    /**
      * @description callback once ready
      */
     onReady: (tablist) => {}
+}
+```
+
+## API
+
+The returned `AriaTablist` class instance exposes the following API (which is also available on the original element's `ariaTablist` property):
+
+```typescript
+{
+    /**
+     * @description the tab elements the module currently recognises
+     */
+    tabs: Element[];
+
+    /**
+     * @description the panel elements the module currently recognises
+     */
+    panels: Element[];
+
+    /**
+     * @description the current options object
+     */
+    options: Object;
+
+    /**
+     * @description trigger a particular tab to open
+     * @param {Number|Element} index: tab index, or tab element
+     * @param {Boolean=} focusTab: whether to move focus to the tab
+     */
+    open(index: Number|Element, focusTab: Boolean = true): void;
+
+    /**
+     * @description trigger a particular tab to close
+     * @param {Number|Element} index: tab index, or tab element
+     */
+    close(index: Number|Element): void;
+
+    /**
+     * @description delete a particular tab and its corresponding panel (if deletable)
+     * @param {Number|Element} index: tab index, or tab element
+     */
+    delete(index: Number|Element): void;
+
+    /**
+     * @description destroy the module - does not remove the elements from the DOM
+     */
+    destroy(): void;
 }
 ```

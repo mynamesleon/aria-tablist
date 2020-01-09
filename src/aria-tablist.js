@@ -243,7 +243,7 @@ class Tablist {
 
         // create tabs and panels arrays
         // only for tabs that control an element, or have a panel labelled by it
-        tabs.forEach(tab => {
+        [...tabs].forEach(tab => {
             // do not process non-element nodes
             if (tab.nodeType !== 1) {
                 return;
@@ -292,6 +292,11 @@ class Tablist {
         this.api.close = (...args) => {
             this.checkMultiple();
             this.deActivateTab.apply(this, args);
+        };
+
+        this.api.delete = (...args) => {
+            this.checkMultiple();
+            this.determineDeletable.apply(this, args);
         };
 
         // store api on original element
@@ -373,7 +378,7 @@ class Tablist {
         if (this.elementIsTab(event.target)) {
             switch (event.keyCode) {
                 case keys.delete:
-                    this.determineDeletable(event);
+                    this.determineDeletable(event.target);
                     break;
                 case keys.enter:
                 case keys.space:
@@ -553,17 +558,20 @@ class Tablist {
 
     /**
      * @description detect if a tab is deletable
-     * @param {Event} event
+     * @param {Element|Number} element
      */
-    determineDeletable(event) {
-        const target = event.target;
+    determineDeletable(element) {
         const deletable = this.options.deletable;
-        if (!deletable || getAttribute(target, 'data-deletable') === 'false') {
+        if (!deletable) {
+            return;
+        }
+        const tab = this.getTab(element);
+        if (getAttribute(tab, 'data-deletable') === 'false') {
             return;
         }
 
         // delete target tab
-        this.deleteTab(event, target);
+        this.deleteTab(tab);
 
         // update tabs and panels arrays for component
         this.generateArrays();
@@ -571,29 +579,29 @@ class Tablist {
         // in multiple, move focus to closest tab
         // in single select mode, activate it
         const multiple = this.multiple;
-        if (!multiple && getAttribute(target, 'aria-selected') === 'true') {
-            if (target[TAB_INDEX_PROP] - 1 < 0) {
+        if (!multiple && getAttribute(tab, 'aria-selected') === 'true') {
+            if (tab[TAB_INDEX_PROP] - 1 < 0) {
                 this.activateTab(this.tabs[0]);
             } else {
-                this.activateTab(this.tabs[target[TAB_INDEX_PROP] - 1]);
+                this.activateTab(this.tabs[tab[TAB_INDEX_PROP] - 1]);
             }
         } else {
             this.switchTabOnArrowPress({
                 keyCode: keys.left,
-                target: target
+                target: tab
             });
         }
 
         // if none of the tabs are focusable, set tabindex="0" on first one
         this.makeFocusable();
+        this.triggerOptionCallback('onDelete', [tab]);
     }
 
     /**
      * @description deletes a tab and its panel
-     * @param {Event} event
      * @param {Element} tab
      */
-    deleteTab(event, tab) {
+    deleteTab(tab) {
         const panel = this.getTabPanel(tab);
         tab.parentElement.removeChild(tab);
         if (panel) {
