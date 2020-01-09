@@ -1,0 +1,34 @@
+{
+    "name": "aria-tablist",
+    "version": "1.0.0-beta.1",
+    "description": "Dependency-free plain JavaScript module for WCAG compliant tablists",
+    "main": "dist/aria-tablist.min.js",
+    "scripts": {
+        "build": "parcel build src/aria-tablist.js --out-file aria-tablist.min.js --no-source-maps"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mynamesleon/aria-tablist.git"
+    },
+    "keywords": [
+        "tablist",
+        "a11y",
+        "ARIA",
+        "WAI-ARIA",
+        "accessible",
+        "accessibility"
+    ],
+    "files": [
+        "src",
+        "dist/*.js"
+    ],
+    "author": "Leon Slater (https://www.mynamesleon.com)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/mynamesleon/aria-tablist/issues"
+    },
+    "homepage": "https://github.com/mynamesleon/aria-tablist#readme",
+    "devDependencies": {
+        "parcel-bundler": "^1.12.4"
+    }
+}
