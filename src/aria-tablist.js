@@ -251,10 +251,11 @@ class Tablist {
 
         // create tabs and panels arrays
         // only for tabs that control an element, or have a panel labelled by it
-        Array.from(tabs).forEach(tab => {
+        for (let i = 0, l = tabs.length; i < l; i += 1) {
+            const tab = tabs[i];
             // do not process non-element nodes
             if (tab.nodeType !== 1) {
-                return;
+                continue;
             }
 
             // ensure tab has an associated panel
@@ -266,7 +267,7 @@ class Tablist {
                 tab.removeAttribute('aria-controls');
                 tab.removeAttribute('aria-selected');
                 tab.removeAttribute('aria-expanded');
-                return;
+                continue;
             }
 
             // ensure element has the tab role
@@ -278,7 +279,7 @@ class Tablist {
 
             // store index on the tab itself for arrow keypresses
             tab[TAB_INDEX_PROP] = this.tabs.length - 1;
-        });
+        }
     }
 
     /**
