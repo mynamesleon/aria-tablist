@@ -77,7 +77,7 @@ function setAttribute(element, attribute, value) {
  * @param {Object} options
  */
 class Tablist {
-    constructor(element, options) {
+    constructor(element, options = {}) {
         if (!element) {
             return;
         }
@@ -96,7 +96,7 @@ class Tablist {
         this.tabs = [];
         this.panels = [];
         this.tablist = element;
-        this.options = { ...DEFAULT_OPTIONS, ...options };
+        this.options = Object.assign({}, DEFAULT_OPTIONS, options);
 
         // multiple set in this method so that it can be re-checked when needed
         this.checkMultiple();
@@ -177,8 +177,8 @@ class Tablist {
      * @description ensure the tab list is focusable, even when no tabs are selected
      */
     makeFocusable() {
-        for (const tab of this.tabs) {
-            if (getAttribute(tab, 'tabindex') === '0') {
+        for (let i = 0, l = this.tabs.length; i < l; i += 1) {
+            if (getAttribute(this.tabs[i], 'tabindex') === '0') {
                 return;
             }
         }
@@ -243,7 +243,7 @@ class Tablist {
 
         // create tabs and panels arrays
         // only for tabs that control an element, or have a panel labelled by it
-        [...tabs].forEach(tab => {
+        Array.from(tabs).forEach(tab => {
             // do not process non-element nodes
             if (tab.nodeType !== 1) {
                 return;
@@ -309,8 +309,8 @@ class Tablist {
      * @returns {Boolean}
      */
     elementIsTab(element) {
-        for (const tab of this.tabs) {
-            if (tab === element) {
+        for (let i = 0, l = this.tabs.length; i < l; i += 1) {
+            if (this.tabs[i] === element) {
                 return true;
             }
         }
