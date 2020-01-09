@@ -1,6 +1,6 @@
 {
     "name": "aria-tablist",
-    "version": "1.0.0-beta.5",
+    "version": "1.0.0",
     "description": "Dependency-free plain JavaScript module for WCAG compliant tablists",
     "main": "dist/aria-tablist.min.js",
     "scripts": {
@@ -19,7 +19,6 @@
         "accessibility"
     ],
     "files": [
-        "src",
         "dist/*.js"
     ],
     "author": "Leon Slater (https://www.mynamesleon.com)",

@@ -122,6 +122,8 @@ Most of the functionality is assumed from the included ARIA attributes in your H
 }
 ```
 
+All component options that accept a Function will have their context (`this`) set to include the full autocomplete API (assuming you use a normal `function: () {}` declaration for the callbacks instead of arrow functions). 
+
 ## API
 
 The returned `AriaTablist` class instance exposes the following API (which is also available on the original element's `ariaTablist` property):

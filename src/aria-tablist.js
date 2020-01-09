@@ -8,6 +8,7 @@ const DEFAULT_OPTIONS = {
     // callbacks
     onOpen: undefined,
     onClose: undefined,
+    onDelete: undefined,
     onReady: undefined
 };
 
@@ -286,27 +287,26 @@ class Tablist {
      * @description generate api instance
      */
     generateApi() {
-        ['tabs', 'panels', 'options', 'destroy'].forEach(prop => {
-            this.api[prop] =
-                typeof prop === 'function'
-                    ? (...args) => this[prop].apply(this, args)
-                    : this[prop];
+        ['tabs', 'panels', 'options'].forEach(prop => {
+            this.api[prop] = this[prop];
         });
 
         this.api.open = (...args) => {
-            this.checkMultiple();
-            this.activateTabWithTimer.apply(this, args);
+            const tab = this.getTab(args[0]);
+            if (tab && getAttribute(tab, 'aria-selected') !== 'true') {
+                this.checkMultiple();
+                this.activateTabWithTimer.apply(this, args);
+            }
         };
-
         this.api.close = (...args) => {
             this.checkMultiple();
-            this.deActivateTab.apply(this, args);
+            this.deactivateTab.apply(this, args);
         };
-
         this.api.delete = (...args) => {
             this.checkMultiple();
             this.determineDeletable.apply(this, args);
         };
+        this.api.destroy = () => this.destroy.call(this);
 
         // store api on original element
         this.tablist[TABLIST_STORAGE_PROP] = this.api;
@@ -374,6 +374,10 @@ class Tablist {
                 case keys.right:
                     this.determineOrientation(event);
                     break;
+                case keys.space:
+                case keys.enter:
+                    preventDefault(event);
+                    break;
             }
         }
     }
@@ -392,6 +396,7 @@ class Tablist {
                 case keys.enter:
                 case keys.space:
                     this.checkMultiple();
+                    preventDefault(event);
                     this.activateTabWithTimer(event.target);
                     break;
             }
@@ -466,7 +471,7 @@ class Tablist {
             typeof this.options.delay === 'number' ? this.options.delay : 0;
         this.tabTimer = setTimeout(() => {
             this.activateTab(element, setFocus, delay);
-        });
+        }, delay);
     }
 
     /**
@@ -574,7 +579,7 @@ class Tablist {
             return;
         }
         const tab = this.getTab(element);
-        if (getAttribute(tab, 'data-deletable') === 'false') {
+        if (!tab || getAttribute(tab, 'data-deletable') === 'false') {
             return;
         }
 
@@ -637,9 +642,11 @@ class Tablist {
             tab.removeAttribute('role');
             delete tab[TAB_INDEX_PROP];
         }
-        this.tablist.removeAttribute('role');
+        if (this.tablist) {
+            delete this.tablist[TABLIST_STORAGE_PROP];
+            this.tablist.removeAttribute('role');
+        }
         // reset element storage
-        delete this.tablist[TABLIST_STORAGE_PROP];
         this.tablist = null;
         this.panels = null;
         this.tabs = null;
