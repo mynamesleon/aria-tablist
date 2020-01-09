@@ -40,7 +40,7 @@ When the module is called on an element, the following steps are taken:
 
 This means your HTML only needs to indicate the relationship between the tabs and panels, and the module will handle the rest:
 
-````html
+```html
 <div id="tabs">
     <div aria-controls="panel-1">Panel 1</div>
     <div aria-controls="panel-2">Panel 2</div>
