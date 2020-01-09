@@ -95,8 +95,16 @@ class Tablist {
         this.api = {};
         this.tabs = [];
         this.panels = [];
+        this.options = {};
         this.tablist = element;
-        this.options = Object.assign({}, DEFAULT_OPTIONS, options);
+
+        // set options
+        for (let i in DEFAULT_OPTIONS) {
+            this.options[i] =
+                typeof options[i] !== 'undefined'
+                    ? options[i]
+                    : DEFAULT_OPTIONS[i];
+        }
 
         // multiple set in this method so that it can be re-checked when needed
         this.checkMultiple();
@@ -561,8 +569,7 @@ class Tablist {
      * @param {Element|Number} element
      */
     determineDeletable(element) {
-        const deletable = this.options.deletable;
-        if (!deletable) {
+        if (!this.options.deletable) {
             return;
         }
         const tab = this.getTab(element);
