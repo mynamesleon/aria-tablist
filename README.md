@@ -45,7 +45,7 @@ This means your HTML only needs to indicate the relationship between the tabs an
     <div aria-controls="panel-1">Panel 1</div>
     <div aria-controls="panel-2">Panel 2</div>
     <div aria-controls="panel-3">Panel 3</div>
-<div>
+</div>
 
 <div id="panel-1">...</div>
 <div id="panel-2">...</div>
@@ -59,7 +59,7 @@ Or you can be include all of the optimal ARIA attributes straight away, includin
     <div role="tab" tabindex="-1" aria-controls="panel-1" id="tab-1">Panel 1</div>
     <div role="tab" tabindex="0" aria-selected="true" aria-controls="panel-2" id="tab-2">Panel 2</div>
     <div role="tab" tabindex="-1" aria-controls="panel-3" id="tab-3">Panel 3</div>
-<div>
+</div>
 
 <div role="tabpanel" aria-labelledby="tab-1" hidden="hidden" id="panel-1">...</div>
 <div role="tabpanel" aria-labelledby="tab-2" id="panel-2">...</div>
