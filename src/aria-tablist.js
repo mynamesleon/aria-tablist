@@ -657,18 +657,16 @@ class Tablist {
  * @description expose AriaTablist at window level
  * @param {Element} element
  * @param {Object} options
- * @returns {Tablist}
+ * @returns {Object}
  */
-window.AriaTablist = (element, options) => new Tablist(element, options).api;
+window['AriaTablist'] = (element, options) => new Tablist(element, options).api;
 
 /**
- * @description AriaTablist class to be exposed
+ * @description AriaTablist function to be exposed
  * @param {Element} element
  * @param {Object} options
  * @returns {Object}
  */
-export default class AriaTablist {
-    constructor(element, options) {
-        this.api = new Tablist(element, options).api;
-    }
+export default function AriaTablist(element, options) {
+    return new Tablist(element, options).api;
 }

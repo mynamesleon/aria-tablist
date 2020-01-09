@@ -1,6 +1,6 @@
 {
     "name": "aria-tablist",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Dependency-free plain JavaScript module for WCAG compliant tablists",
     "main": "dist/aria-tablist.min.js",
     "scripts": {
