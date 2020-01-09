@@ -28,7 +28,7 @@ Or grab the minified JavaScript from unpkg:
 
 ## HTML Requirements
 
-                            When the module is called on an element, the following steps are taken:
+When the module is called on an element, the following steps are taken:
 
 1. The module will look for elements with `role="tab"` set
 2. If none are found, all direct children will be processed
@@ -96,5 +96,5 @@ Most of the functionality is assumed from the included ARIA attributes in your H
      * @description callback once ready
      */
     onReady: (tablist) => {}
-};
+}
 ````
