@@ -97,4 +97,4 @@ Most of the functionality is assumed from the included ARIA attributes in your H
      */
     onReady: (tablist) => {}
 }
-````
+```
