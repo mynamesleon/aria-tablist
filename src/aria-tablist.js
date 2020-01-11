@@ -1,14 +1,57 @@
 ﻿// core options
 const DEFAULT_OPTIONS = {
-    // delay in milliseconds before showing tab
+    /**
+     * @description delay in milliseconds before showing tab(s) from user interaction
+     */
     delay: 0,
-    // allow tab deletion
-    // can be overridden per tab by setting data-deletable="false"
+
+    /**
+     * @description allow tab deletion - can be overridden per tab by setting data-deletable="false"
+     */
     deletable: false,
-    // callbacks
+
+    /**
+     * @description make all tabs focusable in the normal tabbing order (by setting tabindex="0" on them), instead of just 1
+     */
+    focusableTabs: false,
+
+    /**
+     * @description make all panels focusable (by setting tabindex="0" on them)
+     */
+    focusablePanels: true,
+
+    /**
+     * @description activate a tab when it receives focus from using the arrow keys
+     */
+    arrowActivation: false,
+
+    /**
+     * @description value to use when setting tabs or panels to be part of the page's tabbing order
+     */
+    tabindex: 0,
+
+    /**
+     * @description callback each time a tab opens
+     * @type {Function}
+     */
     onOpen: undefined,
+
+    /**
+     * @description callback each time a tab closes
+     * @type {Function}
+     */
     onClose: undefined,
+
+    /**
+     * @description callback when a tab is deleted
+     * @type {Function}
+     */
     onDelete: undefined,
+
+    /**
+     * @description callback once ready
+     * @type {Function}
+     */
     onReady: undefined
 };
 
@@ -73,9 +116,22 @@ function setAttribute(element, attribute, value) {
 }
 
 /**
- * @description Tablist class
+ * @description helper to remove attribute(s) from element
  * @param {Element} element
- * @param {Object} options
+ * @param {String} attr - space delimitted for multiple
+ */
+function removeAttribute(element, attr) {
+    if (element && attr) {
+        for (let i = 0, a = attr.split(' '), l = a.length; i < l; i += 1) {
+            a[i] && element.removeAttribute(a[i]);
+        }
+    }
+}
+
+/**
+ * @description create a Tablist
+ * @param {Element} element
+ * @param {Object} [options={}]
  */
 class Tablist {
     constructor(element, options = {}) {
@@ -99,68 +155,13 @@ class Tablist {
         this.options = {};
         this.tablist = element;
 
-        // set options
-        for (let i in DEFAULT_OPTIONS) {
-            this.options[i] =
-                typeof options[i] !== 'undefined'
-                    ? options[i]
-                    : DEFAULT_OPTIONS[i];
+        // set options and start
+        const defaults = DEFAULT_OPTIONS;
+        for (let i in defaults) {
+            const hasOption = typeof options[i] !== 'undefined';
+            this.options[i] = hasOption ? options[i] : defaults[i];
         }
-
-        // multiple set in this method so that it can be re-checked when needed
-        this.checkMultiple();
-
-        // re-create events for context handling and for removal
-        this.keydownEventListener = this.keydownEventListener.bind(this);
-        this.clickEventListener = this.clickEventListener.bind(this);
-        this.keyupEventListener = this.keyupEventListener.bind(this);
-
-        // store tabs and panels, and set api
-        this.generateArrays(true);
-        this.generateApi();
-
-        // bind listeners, and set at least one starting tab
-        const toActivate = [];
-        const time = new Date().getTime();
-        this.tabs.forEach((tab, index) => {
-            this.addListeners(index);
-            const isSelected = getAttribute(tab, 'aria-selected') === 'true';
-            if (isSelected && (this.multiple || !toActivate.length)) {
-                toActivate.push(tab);
-            }
-            // force connection between tab and panel
-            // use time, appIndex, and tabIndex to ensure unique ids
-            const panel = this.panels[index];
-            const tabId = `aria-tablist-${time}-${appIndex}-tab-${index}`;
-            const panelId = `aria-tablist-${time}-${appIndex}-panel-${index}`;
-            if (!tab.id) {
-                setAttribute(tab, 'id', tabId);
-            }
-            if (!panel.id) {
-                setAttribute(panel, 'id', panelId);
-            }
-            setAttribute(tab, 'aria-controls', panel.id);
-            setAttribute(panel, 'aria-labelledby', tab.id);
-        });
-
-        if (this.tabs.length) {
-            // ensure initialisng element has tablist role
-            setAttribute(this.tablist, 'role', 'tablist');
-
-            // ensure at least one tab gets activated in single select mode
-            if (!this.multiple && !toActivate.length) {
-                toActivate.push(this.tabs[0]);
-            }
-
-            // activate necessary tabs
-            this.deactivateTabs();
-            toActivate.forEach(tab => this.activateTab(tab, false));
-
-            // ensure component is focusable, even if nothing is selected
-            this.makeFocusable();
-        }
-
-        this.triggerOptionCallback('onReady', [this.tablist]);
+        this.init();
     }
 
     /**
@@ -175,7 +176,8 @@ class Tablist {
     }
 
     /**
-     * @description get multiple value from tablist element - set on each user interaction
+     * @description get multiple value from tablist element
+     * has own method to be re-checked on each user interaction
      */
     checkMultiple() {
         this.multiple =
@@ -186,14 +188,43 @@ class Tablist {
      * @description ensure the tab list is focusable, even when no tabs are selected
      */
     makeFocusable() {
+        // use normal loop instead of forEach so that we only process as many as we need to
+        const tabindex = `${this.options.tabindex}` || '0';
         for (let i = 0, l = this.tabs.length; i < l; i += 1) {
-            if (getAttribute(this.tabs[i], 'tabindex') === '0') {
+            if (getAttribute(this.tabs[i], 'tabindex') === tabindex) {
                 return;
             }
         }
+        // default to setting first tab to be focusable, to match radio button behaviour
         if (this.tabs[0]) {
-            setAttribute(this.tabs[0], 'tabindex', '0');
+            setAttribute(this.tabs[0], 'tabindex', tabindex);
         }
+    }
+
+    /**
+     * @description set needed starting aria attributes for wcag
+     * @param {Element} tab
+     * @param {Number} index
+     */
+    setTabStartingAttributes(tab, index) {
+        const panel = this.panels[index];
+        // ensure panels are in the normal tabbing order
+        // do not need to set for tabs here - this is done in deactivateTabs method
+        if (this.options.focusablePanels) {
+            setAttribute(panel, 'tabindex', this.options.tabindex || '0');
+        }
+        // set ids generated from app index and tab index if needed
+        if (!tab.id) {
+            const tabId = `aria-tablist-${appIndex}-tab-${index}`;
+            setAttribute(tab, 'id', tabId);
+        }
+        if (!panel.id) {
+            const panelId = `aria-tablist-${appIndex}-panel-${index}`;
+            setAttribute(panel, 'id', panelId);
+        }
+        // ensure connection between tab and panel
+        setAttribute(tab, 'aria-controls', panel.id);
+        setAttribute(panel, 'aria-labelledby', tab.id);
     }
 
     /**
@@ -203,11 +234,12 @@ class Tablist {
      */
     getTabPanel(element) {
         const tab = typeof element === 'number' ? this.tabs[element] : element;
-        if (tab === null) {
+        // ensure tab is an element
+        if (tab === null || tab.nodeType !== 1) {
             return null;
         }
 
-        // if an index was used, check current panels array first
+        // if an index was used, check panels array for a match first
         let panel = typeof element === 'number' ? this.panels[element] : null;
         if (panel) {
             return panel;
@@ -223,16 +255,13 @@ class Tablist {
         if (!panel) {
             // if tab controlled an element, but was not found, remove that connection
             if (controls) {
-                tab.removeAttribute('aria-controls');
+                removeAttribute(tab, 'aria-controls');
             }
             // if the tab has an id, look for a panel based on that
             if (tab.id) {
                 panel = document.querySelector(`[aria-labelledby="${tab.id}"]`);
             }
         }
-
-        // if panel exists, set panel role if not already set
-        setAttribute(panel, 'role', 'tabpanel');
         return panel;
     }
 
@@ -244,7 +273,7 @@ class Tablist {
         this.tabs = [];
         this.panels = [];
 
-        // if no tab role elements found, assume tablist child should be the tabs
+        // if no tab role elements found, assume tablist children could be the tabs
         let tabs = this.tablist.querySelectorAll('[role="tab"]');
         if (isStartingCheck && !tabs.length) {
             tabs = this.tablist.childNodes;
@@ -254,25 +283,25 @@ class Tablist {
         // only for tabs that control an element, or have a panel labelled by it
         for (let i = 0, l = tabs.length; i < l; i += 1) {
             const tab = tabs[i];
-            // do not process non-element nodes
-            if (tab.nodeType !== 1) {
+            // do not process non-element nodes - also check against panels Array
+            // (when processing childNodes, tabs and panels could be siblings)
+            if (!tab || tab.nodeType !== 1 || this.panels.indexOf(tab) > -1) {
                 continue;
             }
 
             // ensure tab has an associated panel
-            // if no associated panel, remove aria attributes
+            // if not, and the element had the `tab` role, remove it to prevent confusion
             const panel = this.getTabPanel(tab);
             if (!panel) {
-                tab.removeAttribute('role');
-                tab.removeAttribute('tabindex');
-                tab.removeAttribute('aria-controls');
-                tab.removeAttribute('aria-selected');
-                tab.removeAttribute('aria-expanded');
+                if (getAttribute(tab, 'role') === 'tab') {
+                    removeAttribute(tab, 'role');
+                }
                 continue;
             }
 
-            // ensure element has the tab role
+            // ensure tab and panel have needed roles
             setAttribute(tab, 'role', 'tab');
+            setAttribute(panel, 'role', 'tabpanel');
 
             // store in their respective arrays
             this.tabs.push(tab);
@@ -291,22 +320,22 @@ class Tablist {
             this.api[prop] = this[prop];
         });
 
-        this.api.open = (...args) => {
-            const tab = this.getTab(args[0]);
-            if (tab && getAttribute(tab, 'aria-selected') !== 'true') {
-                this.checkMultiple();
-                this.activateTabWithTimer.apply(this, args);
-            }
-        };
-        this.api.close = (...args) => {
-            this.checkMultiple();
-            this.deactivateTab.apply(this, args);
-        };
-        this.api.delete = (...args) => {
-            this.checkMultiple();
-            this.determineDeletable.apply(this, args);
-        };
         this.api.destroy = () => this.destroy.call(this);
+        this.api.delete = index => {
+            this.checkMultiple();
+            this.determineDeletable.call(this, index);
+        };
+        // have open and close methods always set force param to true
+        // to ensure attributes are all updated correctly
+        this.api.open = (index, setFocus) => {
+            this.checkMultiple();
+            this.activateTabWithTimer.apply(this, [index, setFocus, true]);
+        };
+        this.api.close = (index, setFocus) => {
+            this.checkMultiple();
+            this.deactivateTab.apply(this, [index, setFocus, true]);
+            this.makeFocusable();
+        };
 
         // store api on original element
         this.tablist[TABLIST_STORAGE_PROP] = this.api;
@@ -318,16 +347,11 @@ class Tablist {
      * @returns {Boolean}
      */
     elementIsTab(element) {
-        for (let i = 0, l = this.tabs.length; i < l; i += 1) {
-            if (this.tabs[i] === element) {
-                return true;
-            }
-        }
-        return false;
+        return !!(element && this.tabs.indexOf(element) > -1);
     }
 
     /**
-     * @description add event listeners
+     * @description bind events listeners
      * @param {Number} index
      */
     addListeners(index) {
@@ -431,10 +455,9 @@ class Tablist {
             const target = event.target;
             if (typeof target[TAB_INDEX_PROP] === 'number') {
                 preventDefault(event);
-                if (this.tabs[target[TAB_INDEX_PROP] + direction[pressed]]) {
-                    this.tabs[
-                        target[TAB_INDEX_PROP] + direction[pressed]
-                    ].focus();
+                const toFocus = target[TAB_INDEX_PROP] + direction[pressed];
+                if (this.tabs[toFocus]) {
+                    this.focusTab(toFocus);
                 } else if (pressed === keys.left || pressed === keys.up) {
                     this.focusLastTab();
                 } else if (pressed === keys.right || pressed == keys.down) {
@@ -461,8 +484,9 @@ class Tablist {
      * @description activate any given tab with a delay
      * @param {Element|Number} element
      * @param {Boolean=} setFocus
+     * @param {Boolean=} force
      */
-    activateTabWithTimer(element, setFocus) {
+    activateTabWithTimer(element, setFocus, force) {
         if (this.tabTimer) {
             clearTimeout(this.tabTimer);
         }
@@ -470,104 +494,162 @@ class Tablist {
         const delay =
             typeof this.options.delay === 'number' ? this.options.delay : 0;
         this.tabTimer = setTimeout(() => {
-            this.activateTab(element, setFocus, delay);
+            this.activateTab(element, setFocus, force);
         }, delay);
     }
 
     /**
      * @description activate any given tab panel
      * @param {Element|Number} element
-     * @param {Boolean=} setFocus
+     * @param {Boolean} [setFocus=true]
+     * @param {Boolean} [force=false]
      */
-    activateTab(element, setFocus) {
+    activateTab(element, setFocus = true, force = false) {
         const tab = this.getTab(element);
-        if (!tab) {
+
+        // set focus before opening and before disabled check
+        // for arrow navigation and event order
+        if (tab && setFocus) {
+            tab.focus();
+        }
+
+        if (!tab || (!force && getAttribute(tab, 'aria-disabled') === 'true')) {
             return;
         }
 
-        // if multiple, and tab is active, deactivate it
+        // if multiple mode, and tab is active, deactivate it
+        // unless being force set to open
         const isSelected = getAttribute(tab, 'aria-selected') === 'true';
-        if (this.multiple && isSelected) {
+        if (this.multiple && isSelected && !force) {
             this.deactivateTab(tab);
             this.makeFocusable();
             return;
         }
 
+        // force deactivate all other tabs (including disabled ones) in single select mode
         if (!this.multiple) {
-            // no need to reactivate the same tab in single-select mode
-            if (isSelected) {
-                return;
-            }
-            // deactivate all other tabs
-            this.deactivateTabs();
+            this.deactivateTabs([tab]);
         }
 
         // make focusable and indicate selected
-        setAttribute(tab, 'tabindex', '0');
+        const tabindex = this.options.tabindex || '0';
+        setAttribute(tab, 'tabindex', tabindex);
         setAttribute(tab, 'aria-selected', 'true');
-
-        // set expanded, only on multi-selectable tablists
-        if (this.multiple) {
-            setAttribute(tab, 'aria-expanded', 'true');
-        }
 
         // remove hidden attribute from tab panel to make it visible
         const panel = this.getTabPanel(element);
         if (panel) {
-            panel.removeAttribute('hidden');
-            this.triggerOptionCallback('onOpen', [panel]);
-        }
-
-        // set focus when required
-        if (setFocus !== false) {
-            tab.focus();
+            removeAttribute(panel, 'hidden aria-hidden');
+            // set expanded, only on multi-selectable tablists
+            if (this.multiple) {
+                setAttribute(panel, 'aria-expanded', 'true');
+                setAttribute(tab, 'aria-expanded', 'true');
+            }
+            // ensure panel is in the normal tabbing order
+            if (this.options.focusablePanels) {
+                setAttribute(panel, 'tabindex', tabindex);
+            }
+            if (!isSelected) {
+                this.triggerOptionCallback('onOpen', [panel, tab]);
+            }
         }
     }
 
     /**
      * @description deactivate tab (and hide panel) by its index
      * @param {Element|Number} element
+     * @param {Boolean} [setFocus=false]
+     * @param {Boolean} [force=false]
      */
-    deactivateTab(element) {
+    deactivateTab(element, setFocus = false, force = false) {
         const tab = this.getTab(element);
         if (!tab) {
             return;
         }
 
-        // only set aria-expanded in multiple mode
-        if (this.multiple) {
-            setAttribute(tab, 'aria-expanded', 'false');
+        // set focus before closing, for event order
+        if (setFocus) {
+            tab.focus();
         }
-        setAttribute(tab, 'aria-selected', 'false');
-        setAttribute(tab, 'tabindex', '-1');
 
+        // ensure tabindex gets set even when disabled, for programmatic focusing
+        // and in case options change between activations
+        const focusableTabs = this.options.focusableTabs;
+        const tabindex = focusableTabs ? this.options.tabindex || '0' : '-1';
+        setAttribute(tab, 'tabindex', tabindex);
+
+        // allow force closing (used on other tabs in single-select mode)
+        if (!force && getAttribute(tab, 'aria-disabled') === 'true') {
+            return;
+        }
+
+        setAttribute(tab, 'aria-selected', 'false');
         const panel = this.getTabPanel(element);
-        if (panel && getAttribute(panel, 'hidden') !== 'hidden') {
+        if (panel) {
+            // store if it was hidden, to determine if callback should fire
+            const wasHidden = getAttribute(panel, 'hidden') === 'hidden';
+            // now do the hiding
+            removeAttribute(panel, 'tabindex');
             setAttribute(panel, 'hidden', 'hidden');
-            this.triggerOptionCallback('onClose', [panel]);
+            setAttribute(panel, 'aria-hidden', 'true');
+            // set aria-expanded in multiple mode
+            if (this.multiple) {
+                setAttribute(tab, 'aria-expanded', 'false');
+                setAttribute(panel, 'aria-expanded', 'false');
+            }
+            // in single select mode, remove aria-expanded from both elements
+            // in case modes have changed between user actions
+            else {
+                removeAttribute(panel, 'aria-expanded');
+                removeAttribute(tab, 'aria-expanded');
+            }
+            // determine if callback should fire
+            if (!wasHidden) {
+                this.triggerOptionCallback('onClose', [panel, tab]);
+            }
         }
     }
 
     /**
      * @description deactivate all tabs and tab panels
+     * @param {Element[]} [exceptions=[]] - tabs to ignore
      */
-    deactivateTabs() {
-        this.tabs.forEach(tab => this.deactivateTab(tab));
+    deactivateTabs(exceptions = []) {
+        const exceptionsIsArray = Array.isArray(exceptions);
+        this.tabs.forEach(tab => {
+            if (!exceptionsIsArray || exceptions.indexOf(tab) === -1) {
+                this.deactivateTab(tab, false, true);
+            }
+        });
+    }
+
+    /**
+     * @description move focus to a particular tab
+     * @param {Number|Element} index
+     */
+    focusTab(index) {
+        const tab = this.getTab(index);
+        const arrowActivation = this.options.arrowActivation;
+        if (arrowActivation && getAttribute(tab, 'aria-selected') !== 'true') {
+            return this.activateTabWithTimer(tab);
+        }
+        if (tab) {
+            tab.focus();
+        }
     }
 
     /**
      * @description focus first tab
      */
     focusFirstTab() {
-        this.tabs[0] && this.tabs[0].focus();
+        this.focusTab(0);
     }
 
     /**
      * @description focus last tab
      */
     focusLastTab() {
-        const tab = this.tabs[this.tabs.length - 1];
-        tab && tab.focus();
+        this.focusTab(this.tabs.length - 1);
     }
 
     /**
@@ -589,20 +671,15 @@ class Tablist {
         // update tabs and panels arrays for component
         this.generateArrays();
 
-        // in multiple, move focus to closest tab
-        // in single select mode, activate it
+        // in multiple mode, move focus to closest tab
+        // in single select mode, activate it if deleted tab was not selected
         const multiple = this.multiple;
+        const index = tab[TAB_INDEX_PROP];
+        const toFocus = index - 1 > -1 ? index - 1 : 0;
         if (!multiple && getAttribute(tab, 'aria-selected') === 'true') {
-            if (tab[TAB_INDEX_PROP] - 1 < 0) {
-                this.activateTab(this.tabs[0]);
-            } else {
-                this.activateTab(this.tabs[tab[TAB_INDEX_PROP] - 1]);
-            }
-        } else {
-            this.switchTabOnArrowPress({
-                keyCode: keys.left,
-                target: tab
-            });
+            this.activateTab(toFocus);
+        } else if (this.tabs[toFocus]) {
+            this.tabs[toFocus].focus();
         }
 
         // if none of the tabs are focusable, set tabindex="0" on first one
@@ -626,6 +703,10 @@ class Tablist {
      * @description destroy component behaviour
      */
     destroy() {
+        // attributes to remove from tabs and panels
+        // retain aria-controls and aria-labelledby in case it is being refreshed
+        // so the component can return to its previous state
+        const attributes = 'aria-expanded aria-hidden hidden role tabindex';
         let i = this.tabs.length;
         while (i--) {
             const tab = this.tabs[i];
@@ -633,23 +714,69 @@ class Tablist {
             tab.removeEventListener('keydown', this.keydownEventListener);
             tab.removeEventListener('keyup', this.keyupEventListener);
             tab.removeEventListener('click', this.clickEventListener);
-            // reset panel attributes
-            this.panels[i].removeAttribute('aria-expanded');
-            this.panels[i].removeAttribute('hidden');
-            this.panels[i].removeAttribute('role');
-            // reset tab attributes
-            tab.removeAttribute('tabindex');
-            tab.removeAttribute('role');
+            // reset panel and tab attributes
+            removeAttribute(this.panels[i], attributes);
+            removeAttribute(tab, attributes);
             delete tab[TAB_INDEX_PROP];
         }
         if (this.tablist) {
             delete this.tablist[TABLIST_STORAGE_PROP];
-            this.tablist.removeAttribute('role');
+            removeAttribute(this.tablist, 'role');
         }
-        // reset element storage
+        // reset element storage (to help with garbage collection)
         this.tablist = null;
         this.panels = null;
         this.tabs = null;
+    }
+
+    /**
+     * @description get the ball rolling
+     */
+    init() {
+        // set multiple before processing the tabs and panels
+        this.checkMultiple();
+
+        // store tabs and panels, and get the API and events ready
+        this.generateArrays(true);
+        this.generateApi();
+
+        // store unique events for context handling and for removal when destroyed
+        this.keydownEventListener = this.keydownEventListener.bind(this);
+        this.clickEventListener = this.clickEventListener.bind(this);
+        this.keyupEventListener = this.keyupEventListener.bind(this);
+
+        // handle starting states
+        const toActivate = [];
+        this.tabs.forEach((tab, index) => {
+            // bind listeners and set starting attributes for wcag
+            this.setTabStartingAttributes(tab, index);
+            this.addListeners(index);
+
+            // determine if any tabs need to be activated to begin with
+            const isSelected = getAttribute(tab, 'aria-selected') === 'true';
+            if (isSelected && (this.multiple || !toActivate.length)) {
+                toActivate.push(tab);
+            }
+        });
+
+        setAttribute(this.tablist, 'role', 'tablist');
+        if (this.tabs.length) {
+            // ensure initialisng element has tablist role
+
+            // ensure at least one tab gets activated in single select mode
+            if (!this.multiple && !toActivate.length) {
+                toActivate.push(this.tabs[0]);
+            }
+
+            // force de-activate all first to set attributes, then activate starting tabs
+            this.deactivateTabs(toActivate);
+            toActivate.forEach(tab => this.activateTab(tab, false, true));
+
+            // ensure component is focusable, even if nothing is selected
+            this.makeFocusable();
+        }
+
+        this.triggerOptionCallback('onReady', [this.tablist]);
     }
 }
 
