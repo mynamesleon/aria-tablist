@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/aria-tablist.svg)](http://npm.im/aria-tablist)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/aria-tablist/dist/aria-tablist.min.js?compression=gzip)](https://unpkg.com/aria-tablist/dist/aria-tablist.min.js)
 
-Dependency-free plain JavaScript module for WCAG compliant tablists
+Dependency-free plain JavaScript module for WCAG compliant tablists. Also great for accordions.
 
 [Try out the examples](https://mynamesleon.github.io/aria-tablist/examples/)
 
@@ -36,17 +36,19 @@ Or grab the minified JavaScript from unpkg:
 <script src="https://unpkg.com/aria-tablist/dist/aria-tablist.min.js"></script>
 ```
 
+The module relies entirely on standard attributes: it sets the `role` on elements if it needs to, `aria-` attributes for indicating behaviour to screen readers, and relies on setting and removing `hidden="hidden"` to toggle element visibility. This means that you can use all of your own class names and styling, and the module won't override them.
+
 ## HTML Requirements / Progressive Enhancement
 
 When the module is called on an element, the following steps are taken:
 
-1. The module will look for elements with `role="tab"` set
-2. If none are found, all direct children will be processed
-3. For each tab (assumed or otherwise) the module will check for a matching panel by:
-    1. Checking for an `aria-controls` attribute on the tab, and searching for an element with a matching ID
-    2. If the tab has an `id`, searching for an element with an `aria-labelledby` attribute that matches that `id`
-4. For any tabs without a matching panel, any applicable ARIA attributes will be removed from it
-5. For the tabs that have associated panels, all relevant ARIA attributes will be set automatically
+1. The module will look for elements with `role="tab"` set.
+2. If none are found, all direct children will be processed.
+3. For each assumed `tab`, the module will check for a matching `tabpanel` by:
+    1. Checking for an `aria-controls` attribute on the `tab`, and searching for an element with a matching `id`.
+    2. If the `tab` has an `id`, searching for an element with an `aria-labelledby` attribute that matches that `id`.
+4. For any tabs that were processed where a matching panel was **not** found, if they had `role="tab"` set, the `role` attribute will be removed to prevent confusion to screen reader users.
+5. The found tabs and associated panels will then have the relevant `role` and `aria-` attributes set automatically.
 
 This means your HTML only needs to indicate the relationship between the tabs and panels, and the module will handle the rest:
 
@@ -60,6 +62,10 @@ This means your HTML only needs to indicate the relationship between the tabs an
 <div aria-labelledby="tab-1">...</div>
 <div aria-labelledby="tab-2">...</div>
 <div aria-labelledby="tab-3">...</div>
+
+<script>
+    new AriaTablist(document.getElementById('tabs'));
+</script>
 ```
 
 So if you need to cater for users without JavaScript, or if the JavaScript fails to load for whatever reason, there won't be any applicable roles set that would confuse a screen reader user.
@@ -86,7 +92,7 @@ You can of course include all of the optimal ARIA attributes straight away if yo
 
 ## Options
 
-Most of the functionality is assumed from the included ARIA attributes in your HTML (see the [examples](https://mynamesleon.github.io/aria-tablist/examples/)), but some basic options are also available:
+Most of the functionality is assumed from the included ARIA attributes in your HTML (see the [examples](https://mynamesleon.github.io/aria-tablist/examples/)). The remaining available options and their defaults are:
 
 ```javascript
 {
@@ -101,14 +107,34 @@ Most of the functionality is assumed from the included ARIA attributes in your H
     deletable: false,
 
     /**
+     * @description make all tabs focusable in the page's tabbing order (by setting a `tabindex` on them), instead of just 1
+     */
+    focusableTabs: false,
+
+    /**
+     * @description make all tab panels focusable in the page's tabbing order (by setting a `tabindex` on them)
+     */
+    focusablePanels: true,
+
+    /**
+     * @description activate a tab when it receives focus from using the arrow keys
+     */
+    arrowActivation: false,
+
+    /**
+     * @description value to use when setting tabs or panels to be part of the page's tabbing order
+     */
+    tabindex: 0,
+
+    /**
      * @description callback each time a tab opens
      */
-    onOpen: (panel) => {},
+    onOpen: (panel, tab) => {},
 
     /**
      * @description callback each time a tab closes
      */
-    onClose: (panel) => {},
+    onClose: (panel, tab) => {},
 
     /**
      * @description callback when a tab is deleted
@@ -122,7 +148,7 @@ Most of the functionality is assumed from the included ARIA attributes in your H
 }
 ```
 
-All component options that accept a Function will have their context (`this`) set to include the full autocomplete API (assuming you use a normal `function: () {}` declaration for the callbacks instead of arrow functions). 
+All component options that accept a Function will have their context (`this`) set to include the full autocomplete API (assuming you use a normal `function: () {}` declaration for the callbacks instead of arrow functions).
 
 ## API
 
@@ -146,21 +172,22 @@ The returned `AriaTablist` class instance exposes the following API (which is al
     options: Object;
 
     /**
-     * @description trigger a particular tab to open
-     * @param {Number|Element} index: tab index, or tab element
-     * @param {Boolean=} focusTab: whether to move focus to the tab
+     * @description trigger a particular tab to open (even if disabled)
+     * @param {Number|Element} index - tab index, or tab element
+     * @param {Boolean} [focusTab=true] - move focus to the tab before opening
      */
     open(index: Number|Element, focusTab: Boolean = true): void;
 
     /**
-     * @description trigger a particular tab to close
-     * @param {Number|Element} index: tab index, or tab element
+     * @description trigger a particular tab to close (even if disabled)
+     * @param {Number|Element} index - tab index, or tab element
+     * @param {Boolean} [focusTab=false] - move focus to the tab before closing
      */
-    close(index: Number|Element): void;
+    close(index: Number|Element, focusTab: Boolean = false): void;
 
     /**
      * @description delete a particular tab and its corresponding panel (if deletable)
-     * @param {Number|Element} index: tab index, or tab element
+     * @param {Number|Element} index - tab index, or tab element
      */
     delete(index: Number|Element): void;
 
