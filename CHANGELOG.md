@@ -22,3 +22,5 @@ All notable changes to this project will be documented in this file.
 
 -   Issue where no tabs were focusable after using the API to programmatically close them all.
 -   Issue where, when deleting the first `tab`, page focus was moved to the last `tab`.
+
+[1.1.0]: https://github.com/mynamesleon/aria-tablist/compare/v1.0.0...v1.1.0
