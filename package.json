@@ -1,10 +1,10 @@
 {
     "name": "aria-tablist",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Dependency-free plain JavaScript module for WCAG compliant tablists",
     "main": "dist/aria-tablist.min.js",
     "scripts": {
-        "build": "parcel build src/aria-tablist.js --out-file aria-tablist.min.js --no-source-maps"
+        "build": "webpack"
     },
     "repository": {
         "type": "git",
@@ -16,10 +16,21 @@
         "ARIA",
         "WAI-ARIA",
         "accessible",
-        "accessibility"
+        "accessibility",
+        "accordion"
     ],
     "files": [
         "dist/*.js"
+    ],
+    "browserslist": [
+        ">0.1%",
+        "last 2 Chrome versions",
+        "last 2 Firefox versions",
+        "last 2 Edge versions",
+        "last 2 Samsung versions",
+        "Safari >= 9",
+        "ie 9-11",
+        "iOS >= 9"
     ],
     "author": "Leon Slater (https://www.mynamesleon.com)",
     "license": "MIT",
@@ -29,6 +40,9 @@
     "homepage": "https://github.com/mynamesleon/aria-tablist#readme",
     "devDependencies": {
         "@babel/core": "^7.7.7",
-        "parcel-bundler": "^1.12.4"
+        "@babel/preset-env": "^7.7.7",
+        "babel-loader": "^8.0.6",
+        "webpack": "^4.41.5",
+        "webpack-cli": "^3.3.10"
     }
 }

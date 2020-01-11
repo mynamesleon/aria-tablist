@@ -1,14 +1,5 @@
 module.exports = {
-    presets: [
-        [
-            '@babel/preset-env',
-            {
-                shippedProposals: true,
-                useBuiltIns: 'usage',
-                loose: true
-            }
-        ]
-    ],
+    presets: [['@babel/preset-env']],
     plugins: [
         // improve IE compatibility
         ['@babel/plugin-transform-modules-commonjs', { loose: true }],
