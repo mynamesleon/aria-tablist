@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2020-01-15
+
+### Added
+
+-   Option to enable all arrow keys to be used when navigating between tabs via the keyboard (instead of detecting the tablist's `aria-orientation` value and enabling left and right arrows by default, and up and down arrows for `vertical` orientation tablists).
+-   Option to control the selector that's used when initially looking for tabs, with the default being `[role="tab"]` as before. This is to give the option of not having `role="tab"` elements in the DOM initially that may confuse screen readers if the module fails to load (due to external reasons, such as network issues).
+-   Can now use `data-controls` or `data-labelledby` to indicate tab-panel relationships, as well as `aria-controls` or `aria-labelledby` attributes.
+-   Horizontal arrow key reversal when the tablist (or document) is in RTL mode.
+
+### Changed
+
+-   Moved code and build over to TypeScript for: code improvements, self-documentation, and reduced bundle size by using an ES6 output from TypeScript that's bundled to UMD with webpack.
+
+### Fixed
+
+-   Issue where the API's `tabs` and `panels` Arrays were not being updated after a delete action.
+
 ## [1.1.0] - 2020-01-11
 
 ### Added
@@ -23,4 +40,5 @@ All notable changes to this project will be documented in this file.
 -   Issue where no tabs were focusable after using the API to programmatically close them all.
 -   Issue where, when deleting the first `tab`, page focus was moved to the last `tab`.
 
+[1.2.0]: https://github.com/mynamesleon/aria-tablist/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/mynamesleon/aria-tablist/compare/v1.0.0...v1.1.0
