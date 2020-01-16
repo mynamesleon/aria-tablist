@@ -425,7 +425,7 @@ export class Tablist {
             if (this.options.focusablePanels) {
                 setAttribute(panel, 'tabindex', tabindex);
             }
-            if (!wasHidden) {
+            if (wasHidden) {
                 this.triggerOptionCallback('onOpen', [panel, tab]);
             }
         }
