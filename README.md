@@ -14,7 +14,7 @@ Key design goals and features are:
 -   **progressive enhancement**: Allows for only the tab and panel relationship to be indicated in the DOM, and adds `role` and `aria` attributes automatically as needed
 -   **accessibility**: Follows the WCAG spec by default, with options to tweak behaviour
 -   **compatibility**: Broad browser and device support (IE9+)
--   **starting states**: Can use `aria-selected="true"` to indicate which tab(s) should be enabled by default.
+-   **starting states**: Can use `aria-selected="true"` or `data-selected="true"` to indicate which tab(s) should be enabled by default.
 -   **deletion**: Can enable tab (and panel) deletion using the delete key
 
 ## Installation / usage

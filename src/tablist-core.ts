@@ -624,7 +624,9 @@ export class Tablist {
         this.tabs.forEach((tab, index) => {
             this.addListenersToTab(index);
             // determine if any tabs need to be activated to begin with
-            const isSelected: Boolean = getAttribute(tab, 'aria-selected') === 'true';
+            const isSelected: Boolean =
+                getAttribute(tab, 'aria-selected') === 'true' ||
+                getAttribute(tab, 'data-selected') === 'true';
             if (isSelected && (this.multiple || !toActivate.length)) {
                 toActivate.push(tab);
             }

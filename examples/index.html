@@ -221,8 +221,7 @@
                 }
             }
         </style>
-        <!-- <script src="https://unpkg.com/aria-tablist"></script> -->
-        <script src="../dist/aria-tablist.min.js"></script>
+        <script src="https://unpkg.com/aria-tablist"></script>
     </head>
     <body>
         <div id="wrapper">
@@ -491,13 +490,13 @@
                                 <div
                                     data-controls="example-5-panel-2"
                                     aria-disabled="true"
-                                    aria-selected="true"
+                                    data-selected="true"
                                 >
                                     Orange
                                 </div>
                             </li>
                             <li role="presentation">
-                                <div data-controls="example-5-panel-3">Pear</div>
+                                <div aria-controls="example-5-panel-3">Pear</div>
                             </li>
                         </ul>
                         <div id="example-5-panel-1">
@@ -540,12 +539,12 @@
         &lt;div data-controls="apple"&gt;Apple&lt;/div&gt;
     &lt;/li&gt;
     &lt;li role="presentation"&gt;
-        &lt;div data-controls="orange" aria-disabled="true" aria-selected="true"&gt;
+        &lt;div data-controls="orange" aria-disabled="true" data-selected="true"&gt;
             Orange
         &lt;/div&gt;
     &lt;/li&gt;
     &lt;li role="presentation"&gt;
-        &lt;div data-controls="pear"&gt;Pear&lt;/div&gt;
+        &lt;div aria-controls="pear"&gt;Pear&lt;/div&gt;
     &lt;/li&gt;
 &lt;/ul&gt;
 
@@ -561,9 +560,10 @@
                         >
                         <p>
                             This example also demonstrates that the HTML structure can be completely
-                            flexible. In this case, <code>data-controls</code> attributes are also being
-                            used to indicate the tab-panel relationships instead of
-                            <code>aria-controls</code>.
+                            flexible, that <code>data-controls</code> can be used to indicate the
+                            tab-panel relationships as well as <code>aria-controls</code>, and that
+                            <code>data-selected</code> can be used to indicate the starting tab(s) as
+                            well as <code>aria-controls</code>.
                         </p>
                     </div>
                 </section>

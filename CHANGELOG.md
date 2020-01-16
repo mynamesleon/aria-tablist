@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 -   Option to enable all arrow keys to be used when navigating between tabs via the keyboard (instead of detecting the tablist's `aria-orientation` value and enabling left and right arrows by default, and up and down arrows for `vertical` orientation tablists).
 -   Option to control the selector that's used when initially looking for tabs, with the default being `[role="tab"]` as before. This is to give the option of not having `role="tab"` elements in the DOM initially that may confuse screen readers if the module fails to load (due to external reasons, such as network issues).
--   Can now use `data-controls` or `data-labelledby` to indicate tab-panel relationships, as well as `aria-controls` or `aria-labelledby` attributes.
+-   Allow use of `data-` attributes: can now use `data-controls` or `data-labelledby` to indicate tab-panel relationships as well as `aria-controls` or `aria-labelledby` attributes, and can use `data-selected="true"` to indicate the starting tab(s) as well as `aria-selected="true"`.
 -   Horizontal arrow key reversal when the tablist (or document) is in RTL mode.
 
 ### Changed
