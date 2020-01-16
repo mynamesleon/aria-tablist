@@ -1,14 +1,17 @@
 module.exports = {
     mode: 'production',
-    entry: './src/aria-tablist.js',
+    entry: './src/aria-tablist.ts',
     module: {
         rules: [
             {
-                test: /\.(js)$/,
-                use: ['babel-loader'],
+                test: /\.tsx?$/,
+                use: 'ts-loader',
                 exclude: /node_modules/
             }
         ]
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js']
     },
     output: {
         libraryTarget: 'umd',
