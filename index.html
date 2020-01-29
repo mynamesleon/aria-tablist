@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Aria Tablist</title>
+        <meta
+            name="description"
+            content="Dependency-free plain JavaScript module for WCAG compliant tablists. Also great for accordions."
+        />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@leon_slater" />
+        <meta name="twitter:title" content="aria-tablist" />
+        <meta
+            name="twitter:description"
+            content="Dependency-free plain JavaScript module for WCAG compliant tablists. Also great for accordions."
+        />
+        <style type="text/css">
+            html {
+                color: #434343;
+                font-family: Arial, Helvetica, sans-serif;
+                background: #fcfcfb;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                line-height: 1.5em;
+            }
+            pre,
+            code {
+                font-family: monospace;
+                font-size: 1rem;
+            }
+            code {
+                background: #ebebeb;
+                border: 0.1875rem solid #ebebeb;
+                font-weight: normal;
+                color: #000;
+            }
+            pre code {
+                border: none;
+            }
+            h1,
+            h2,
+            h3 {
+                font-weight: normal;
+            }
+            h1 {
+                font-size: 2.25rem;
+                line-height: 1;
+                display: flex;
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: space-between;
+                align-content: center;
+            }
+            h1 span {
+                display: block;
+            }
+            h1 small {
+                width: 100%;
+                font-size: 50%;
+                margin-top: 0.9375rem;
+                display: block;
+                line-height: 1.3;
+                box-sizing: border-box;
+            }
+            h2 {
+                font-size: 1.75rem;
+            }
+            .button {
+                display: inline-block;
+                padding: 0.4375rem 1rem;
+                border: 0.125rem solid #434143;
+                background-color: transparent;
+                border-radius: 0.25rem;
+                text-decoration: none;
+                font-size: 1.125rem;
+                color: #434143;
+            }
+            .button:hover,
+            .button:focus {
+                background-color: #434143;
+                color: #fcfcfb;
+            }
+            section {
+                margin-top: 1.5rem;
+            }
+            section ~ section {
+                margin-top: 3rem;
+                padding-top: 1.5rem;
+                border-top: 0.125rem solid #606060;
+            }
+            dt,
+            dd {
+                display: block;
+                padding: 0 0 0 0.75rem;
+                border-left: 0.1875rem solid #606060;
+                margin: 0;
+            }
+            dt {
+                font-weight: bold;
+                margin-top: 0.9375rem;
+            }
+            dl > div ~ div {
+                margin-top: 1.875rem;
+                padding-top: 1.875rem;
+                border-top: 0.0625rem solid #d8d8d8;
+            }
+            dl > div dt:first-child {
+                margin-top: 0;
+            }
+            a:focus,
+            input:focus,
+            [tabindex]:focus {
+                outline: none;
+                border-color: #5e9ed6;
+                box-shadow: 0 0 0 0.0625rem #5e9ed6, 0 0 0.5rem rgba(94, 158, 214, 0.5);
+            }
+            #wrapper {
+                max-width: 47.5rem;
+                padding: 0 1.25rem;
+                margin: 3.75rem auto;
+                box-sizing: border-box;
+            }
+            .tile {
+                background: #fff;
+                margin: 0 auto 1.875rem;
+                padding: 1.875rem 1.5625rem;
+                border: 0.0625rem solid #ccc;
+                box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.1);
+            }
+            .tile > h2,
+            .tile > h3 {
+                font-size: 1.375rem;
+                font-weight: normal;
+                padding-bottom: 0.9375rem;
+                border-bottom: 0.0625rem solid #ccc;
+            }
+            .tile > :first-child {
+                margin-top: 0;
+            }
+            .tile > :last-child {
+                margin-bottom: 0;
+            }
+            [role='tablist'] {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            [role='tablist'][aria-orientation='vertical'] {
+                flex-direction: column;
+            }
+            [role='tab'],
+            [role='tabpanel'] {
+                border: 0.0625rem solid #ccc;
+                box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.1);
+                margin-right: 0.625rem;
+                margin-bottom: 0.625rem;
+                margin-left: 0;
+                padding: 0.4375rem 0.625rem;
+                border-radius: 0.125rem;
+            }
+            [role='tab'] {
+                float: left;
+                cursor: pointer;
+            }
+            [dir='rtl'] [role='tab'] {
+                margin-right: 0;
+                margin-left: 0.625rem;
+            }
+            [role='tabpanel'] {
+                width: 100%;
+                clear: both;
+                margin-right: 0;
+                box-sizing: border-box;
+            }
+            [role='tab'][aria-selected='true'] {
+                background: #f3f3f3;
+                border-color: #606060;
+                font-weight: bold;
+                border-left-width: 0.25rem;
+            }
+            [role='tab'][aria-disabled='true'] {
+                opacity: 0.65;
+                font-weight: normal;
+                cursor: not-allowed;
+            }
+            [aria-orientation='vertical'] [role='tab'] {
+                float: none;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                background-size: 1.0625rem;
+                background-repeat: no-repeat;
+                background-position: right 0.625rem top 50%;
+                background-image: url("data:image/svg+xml;charset=utf8,%3Csvg width='17' height='10' viewBox='0 0 17 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.023L8.488 8 16 1' stroke-width='1' stroke='%23434143' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+            }
+            [aria-orientation='vertical'] [role='tab'][aria-selected='true'] {
+                background-image: url("data:image/svg+xml;charset=utf8,%3Csvg width='17' height='10' viewBox='0 0 17 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 8L8.488 1 16 8' stroke-width='1' stroke='%23434143' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+            }
+
+            @media (max-width: 30rem) {
+                #wrapper {
+                    padding: 0 1.0625rem;
+                }
+                h1 span {
+                    width: 100%;
+                    margin-bottom: 0.9375rem;
+                }
+                .tile {
+                    padding: 1.375rem 1.0625rem;
+                }
+            }
+        </style>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/a11y-dark.min.css"
+        />
+        <script src="https://unpkg.com/aria-tablist"></script>
+    </head>
+    <body>
+        <div id="wrapper">
+            <header>
+                <h1>
+                    <span>Aria Tablist</span>
+                    <a class="button" href="https://www.github.com/mynamesleon/aria-tablist">On GitHub</a>
+                    <small
+                        >Dependency-free plain JavaScript module for WCAG compliant tablists.<br />Also great for
+                        accordions.
+                    </small>
+                </h1>
+            </header>
+            <main>
+                <section>
+                    <h2>Examples</h2>
+                    <div class="tile" id="example-1">
+                        <h3>1. Horizontal tabs (standard example)</h3>
+                        <div id="example-1-tabs">
+                            <div aria-controls="example-1-panel-1">Apple</div>
+                            <div aria-controls="example-1-panel-2">Orange</div>
+                            <div aria-controls="example-1-panel-3">Pear</div>
+                        </div>
+                        <div id="example-1-panel-1">
+                            An apple is a sweet, edible fruit produced by an apple tree (Malus domestica). Apple
+                            trees are cultivated worldwide and are the most widely grown species in the genus
+                            Malus. The tree originated in Central Asia, where its wild ancestor, Malus sieversii,
+                            is still found today. Apples have been grown for thousands of years in Asia and Europe
+                            and were brought to North America by European colonists. Apples have religious and
+                            mythological significance in many cultures, including Norse, Greek and European
+                            Christian tradition.
+                        </div>
+                        <div id="example-1-panel-2">
+                            The orange is the fruit of the citrus species Citrus × sinensis in the family Rutaceae,
+                            native to China. It is also called sweet orange, to distinguish it from the related
+                            Citrus × aurantium, referred to as bitter orange. The sweet orange reproduces asexually
+                            (apomixis through nucellar embryony); varieties of sweet orange arise through
+                            mutations.
+                        </div>
+                        <div id="example-1-panel-3">
+                            The pear (/ˈpɛər/) tree and shrub are a species of genus Pyrus /ˈpaɪrəs/, in the family
+                            Rosaceae, bearing the pomaceous fruit of the same name. Several species of pear are
+                            valued for their edible fruit and juices while others are cultivated as trees.
+                        </div>
+                        <script>
+                            AriaTablist(document.getElementById('example-1-tabs'));
+                        </script>
+                        <pre><code class="lang-html">&lt;div id="fruits"&gt;
+    &lt;div aria-controls="apple"&gt;Apple&lt;/div&gt;
+    &lt;div aria-controls="orange"&gt;Orange&lt;/div&gt;
+    &lt;div aria-controls="pear"&gt;Pear&lt;/div&gt;
+&lt;div&gt;
+
+&lt;div id="apple"&gt;...&lt;/div&gt;
+&lt;div id="orange"&gt;...&lt;/div&gt;
+&lt;div id="pear"&gt;...&lt;/div&gt;
+
+&lt;script&gt;
+    AriaTablist(document.getElementById('fruits'));
+&lt;/script&gt;
+</code></pre>
+                        <p id="keyboard-hint">
+                            As per the WCAG spec, by default, only the
+                            <b>active</b> tab is in the page's normal tabbing order; keyboard-only users can
+                            navigate to the others using the arrow keys, or you can set the
+                            <code>focusableTabs</code> option to <code>true</code> (in the next example) to ensure
+                            all tabs are in the page's normal tabbing order. The 'home' and 'end' keys will also
+                            move focus to the first and last tab respectively.
+                        </p>
+                    </div>
+                    <div class="tile" id="example-2">
+                        <h3>2. Vertical tabs, all focusable</h3>
+                        <h4>This example makes for a good accordion...</h4>
+                        <div id="example-2-tabs" aria-orientation="vertical">
+                            <div id="example-2-tab-1">Apple</div>
+                            <div aria-labelledby="example-2-tab-1">
+                                An apple is a sweet, edible fruit produced by an apple tree (Malus domestica).
+                                Apple trees are cultivated worldwide and are the most widely grown species in the
+                                genus Malus. The tree originated in Central Asia, where its wild ancestor, Malus
+                                sieversii, is still found today. Apples have been grown for thousands of years in
+                                Asia and Europe and were brought to North America by European colonists. Apples
+                                have religious and mythological significance in many cultures, including Norse,
+                                Greek and European Christian tradition.
+                            </div>
+                            <div id="example-2-tab-2">Orange</div>
+                            <div aria-labelledby="example-2-tab-2">
+                                The orange is the fruit of the citrus species Citrus × sinensis in the family
+                                Rutaceae, native to China. It is also called sweet orange, to distinguish it from
+                                the related Citrus × aurantium, referred to as bitter orange. The sweet orange
+                                reproduces asexually (apomixis through nucellar embryony); varieties of sweet
+                                orange arise through mutations.
+                            </div>
+                            <div id="example-2-tab-3">Pear</div>
+                            <div aria-labelledby="example-2-tab-3">
+                                The pear (/ˈpɛər/) tree and shrub are a species of genus Pyrus /ˈpaɪrəs/, in the
+                                family Rosaceae, bearing the pomaceous fruit of the same name. Several species of
+                                pear are valued for their edible fruit and juices while others are cultivated as
+                                trees.
+                            </div>
+                        </div>
+                        <script>
+                            AriaTablist(document.getElementById('example-2-tabs'), {
+                                focusableTabs: true
+                            });
+                        </script>
+                        <pre><code class="lang-html">&lt;div id="fruits" aria-orientation="vertical"&gt;
+    &lt;div id="apple"&gt;Apple&lt;/div&gt;
+    &lt;div aria-labelledby="apple"&gt;...&lt;/div&gt;
+
+    &lt;div id="orange"&gt;Orange&lt;/div&gt;
+    &lt;div aria-labelledby="orange"&gt;...&lt;/div&gt;
+
+    &lt;div id="pear"&gt;Pear&lt;/div&gt;
+    &lt;div aria-labelledby="pear"&gt;...&lt;/div&gt;
+&lt;div&gt;
+
+&lt;script&gt;
+    AriaTablist(document.getElementById('fruits'), {
+        focusableTabs: true
+    });
+&lt;/script&gt;
+</code></pre>
+                    </div>
+                    <div class="tile" id="example-3">
+                        <h3>
+                            3. Horizontal tabs that activate as you navigate through them with
+                            <em>any</em> arrow keypresses
+                        </h3>
+                        <div id="example-3-tabs">
+                            <div aria-controls="example-3-panel-1">Apple</div>
+                            <div aria-controls="example-3-panel-2">
+                                Orange
+                            </div>
+                            <div aria-controls="example-3-panel-3">
+                                Pear
+                            </div>
+                        </div>
+                        <div id="example-3-panel-1">
+                            An apple is a sweet, edible fruit produced by an apple tree (Malus domestica). Apple
+                            trees are cultivated worldwide and are the most widely grown species in the genus
+                            Malus. The tree originated in Central Asia, where its wild ancestor, Malus sieversii,
+                            is still found today. Apples have been grown for thousands of years in Asia and Europe
+                            and were brought to North America by European colonists. Apples have religious and
+                            mythological significance in many cultures, including Norse, Greek and European
+                            Christian tradition.
+                        </div>
+                        <div id="example-3-panel-2">
+                            The orange is the fruit of the citrus species Citrus × sinensis in the family Rutaceae,
+                            native to China. It is also called sweet orange, to distinguish it from the related
+                            Citrus × aurantium, referred to as bitter orange. The sweet orange reproduces asexually
+                            (apomixis through nucellar embryony); varieties of sweet orange arise through
+                            mutations.
+                        </div>
+                        <div id="example-3-panel-3">
+                            The pear (/ˈpɛər/) tree and shrub are a species of genus Pyrus /ˈpaɪrəs/, in the family
+                            Rosaceae, bearing the pomaceous fruit of the same name. Several species of pear are
+                            valued for their edible fruit and juices while others are cultivated as trees.
+                        </div>
+                        <script>
+                            AriaTablist(document.getElementById('example-3-tabs'), {
+                                arrowActivation: true,
+                                allArrows: true
+                            });
+                        </script>
+                        <pre><code class="lang-html">&lt;div id="fruits"&gt;
+    &lt;div aria-controls="apple"&gt;Apple&lt;/div&gt;
+    &lt;div aria-controls="orange"&gt;Orange&lt;/div&gt;
+    &lt;div aria-controls="pear"&gt;Pear&lt;/div&gt;
+&lt;div&gt;
+
+&lt;div id="apple"&gt;...&lt;/div&gt;
+&lt;div id="orange"&gt;...&lt;/div&gt;
+&lt;div id="pear"&gt;...&lt;/div&gt;
+
+&lt;script&gt;
+    AriaTablist(document.getElementById('fruits'), {
+        arrowActivation: true,
+        allArrows: true
+    });
+&lt;/script&gt;
+</code></pre>
+                    </div>
+                    <div class="tile" id="example-4">
+                        <h3>
+                            4. Vertical, all focusable, deletable, multi-selectable tabs, with second and third tab
+                            active by default
+                        </h3>
+                        <h4>The <code>deletable</code> option enables tab deletion via the keyboard</h4>
+                        <div id="example-4-tabs" aria-orientation="vertical" aria-multiselectable="true">
+                            <div aria-controls="example-4-panel-1">Apple</div>
+                            <div id="example-4-panel-1">
+                                An apple is a sweet, edible fruit produced by an apple tree (Malus domestica).
+                                Apple trees are cultivated worldwide and are the most widely grown species in the
+                                genus Malus. The tree originated in Central Asia, where its wild ancestor, Malus
+                                sieversii, is still found today. Apples have been grown for thousands of years in
+                                Asia and Europe and were brought to North America by European colonists. Apples
+                                have religious and mythological significance in many cultures, including Norse,
+                                Greek and European Christian tradition.
+                            </div>
+                            <div aria-controls="example-4-panel-2" aria-selected="true">
+                                Orange
+                            </div>
+                            <div id="example-4-panel-2">
+                                The orange is the fruit of the citrus species Citrus × sinensis in the family
+                                Rutaceae, native to China. It is also called sweet orange, to distinguish it from
+                                the related Citrus × aurantium, referred to as bitter orange. The sweet orange
+                                reproduces asexually (apomixis through nucellar embryony); varieties of sweet
+                                orange arise through mutations.
+                            </div>
+                            <div aria-controls="example-4-panel-3" aria-selected="true">
+                                Pear
+                            </div>
+                            <div id="example-4-panel-3">
+                                The pear (/ˈpɛər/) tree and shrub are a species of genus Pyrus /ˈpaɪrəs/, in the
+                                family Rosaceae, bearing the pomaceous fruit of the same name. Several species of
+                                pear are valued for their edible fruit and juices while others are cultivated as
+                                trees.
+                            </div>
+                        </div>
+                        <script>
+                            AriaTablist(document.getElementById('example-4-tabs'), {
+                                deletable: true,
+                                focusableTabs: true
+                            });
+                        </script>
+                        <pre><code class="lang-html">&lt;div id="fruits" aria-multiselectable="true" aria-orientation="vertical"&gt;
+    &lt;div aria-controls="apple"&gt;Apple&lt;/div&gt;
+    &lt;div id="apple"&gt;...&lt;/div&gt;
+
+    &lt;div aria-controls="orange" aria-selected="true"&gt;Orange&lt;/div&gt;
+    &lt;div id="orange"&gt;...&lt;/div&gt;
+
+    &lt;div aria-controls="pear" aria-selected="true"&gt;Pear&lt;/div&gt;
+    &lt;div id="pear"&gt;...&lt;/div&gt;
+&lt;div&gt;
+
+&lt;script&gt;
+    AriaTablist(document.getElementById('fruits'), {
+        deletable: true,
+        focusableTabs: true
+    });
+&lt;/script&gt;
+</code></pre>
+                    </div>
+                    <div class="tile" id="example-5">
+                        <h3>
+                            5. Horizontal tabs, with second tab open by default but disabled, in RTL mode
+                        </h3>
+                        <ul id="example-5-tabs" dir="rtl">
+                            <li>
+                                <div data-controls="example-5-panel-1">Apple</div>
+                            </li>
+                            <li>
+                                <div data-controls="example-5-panel-2" aria-disabled="true" data-selected="true">
+                                    Orange
+                                </div>
+                            </li>
+                            <li>
+                                <div aria-controls="example-5-panel-3">Pear</div>
+                            </li>
+                        </ul>
+                        <div id="example-5-panel-1">
+                            An apple is a sweet, edible fruit produced by an apple tree (Malus domestica). Apple
+                            trees are cultivated worldwide and are the most widely grown species in the genus
+                            Malus. The tree originated in Central Asia, where its wild ancestor, Malus sieversii,
+                            is still found today. Apples have been grown for thousands of years in Asia and Europe
+                            and were brought to North America by European colonists. Apples have religious and
+                            mythological significance in many cultures, including Norse, Greek and European
+                            Christian tradition.
+                        </div>
+                        <div id="example-5-panel-2">
+                            The orange is the fruit of the citrus species Citrus × sinensis in the family Rutaceae,
+                            native to China. It is also called sweet orange, to distinguish it from the related
+                            Citrus × aurantium, referred to as bitter orange. The sweet orange reproduces asexually
+                            (apomixis through nucellar embryony); varieties of sweet orange arise through
+                            mutations.
+                        </div>
+                        <div id="example-5-panel-3">
+                            The pear (/ˈpɛər/) tree and shrub are a species of genus Pyrus /ˈpaɪrəs/, in the family
+                            Rosaceae, bearing the pomaceous fruit of the same name. Several species of pear are
+                            valued for their edible fruit and juices while others are cultivated as trees.
+                        </div>
+                        <script>
+                            AriaTablist(document.getElementById('example-5-tabs'), {
+                                tabSelector: 'div'
+                            });
+                        </script>
+                        <pre><code class="lang-html">&lt;ul id="fruits" dir="rtl"&gt;
+    &lt;li&gt;
+        &lt;div data-controls="apple"&gt;Apple&lt;/div&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;div data-controls="orange" aria-disabled="true" data-selected="true"&gt;
+            Orange
+        &lt;/div&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;div aria-controls="pear"&gt;Pear&lt;/div&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div id="apple"&gt;...&lt;/div&gt;
+&lt;div id="orange"&gt;...&lt;/div&gt;
+&lt;div id="pear"&gt;...&lt;/div&gt;
+
+&lt;script&gt;
+    AriaTablist(document.getElementById('fruits'), {
+        tabSelector: 'div'
+    });
+&lt;/script&gt;
+</code></pre>
+                        <p>
+                            With <code>dir="rtl"</code> set on the main element, or on the
+                            <code>document</code> (<code>&lt;html&gt;</code> tag), the horizontal arrow key
+                            behaviour will also be reversed (the left arrow will move focus to the next tab, and
+                            the right arrow will move focus to the previous).
+                        </p>
+                        <p>
+                            This example also demonstrates that the HTML structure can be completely flexible, that
+                            <code>data-controls</code> can be used to indicate the tab-panel relationships as well
+                            as <code>aria-controls</code>, and that <code>data-selected</code> can be used to
+                            indicate the starting tab(s) as well as <code>aria-selected</code>.
+                        </p>
+                    </div>
+                </section>
+                <section id="progressive-enhancement">
+                    <div class="tile">
+                        <h2>HTML requirements / Progressive enhancement</h2>
+                        <p>
+                            When the module is called on an element, the following steps are taken:
+                        </p>
+                        <ol>
+                            <li>
+                                The module will search for <code>tab</code> elements using the
+                                <code>tabSelector</code> option (<code>'[role="tab"]'</code> by default).
+                            </li>
+                            <li>
+                                If none are found, all direct children will be processed.
+                            </li>
+                            <li>
+                                For each assumed <code>tab</code>, the module will check for a matching
+                                <code>tabpanel</code> by:
+                                <ol>
+                                    <li>
+                                        Checking for an <code>aria-controls</code> or
+                                        <code>data-controls</code> attribute on the <code>tab</code>, and searching
+                                        for an element with a matching <code>id</code>.
+                                    </li>
+                                    <li>
+                                        If the tab has an <code>id</code>, searching for an element with an
+                                        <code>aria-labelledby</code> or <code>data-labelledby</code> attribute that
+                                        matches that <code>id</code>.
+                                    </li>
+                                </ol>
+                            </li>
+                            <li>
+                                For any tabs that were processed where a matching panel was
+                                <b>not</b> found, if they have <code>role="tab"</code> set, the
+                                <code>role</code> attribute will be removed to prevent confusion to screen reader
+                                users.
+                            </li>
+                            <li>
+                                The found tabs and associated panels will then have the relevant
+                                <code>role</code> and <code>aria-</code> attributes set automatically.
+                            </li>
+                        </ol>
+                        <p>
+                            This means your HTML only needs to indicate the relationship between the tabs and
+                            panels, and the module will handle the rest:
+                        </p>
+                        <pre><code class="lang-html">&lt;div id="tabs"&gt;
+    &lt;div id="tab-1"&gt;Panel 1&lt;/div&gt;
+    &lt;div aria-controls="panel-2"&gt;Panel 2&lt;/div&gt;
+    &lt;div data-controls="panel-3"&gt;Panel 3&lt;/div&gt;
+&lt;div&gt;
+
+&lt;div aria-labelledby="tab-1"&gt;...&lt;/div&gt;
+&lt;div id="panel-2"&gt;...&lt;/div&gt;
+&lt;div id="panel-3"&gt;...&lt;/div&gt;
+
+&lt;script&gt;
+   AriaTablist(document.getElementById('tabs'));
+&lt;/script&gt;
+</code></pre>
+                        <p>
+                            So if you need to cater for users without JavaScript, or if the JavaScript fails to
+                            load for whatever reason, there won't be any applicable roles set that would confuse a
+                            screen reader user.
+                        </p>
+                        <p>
+                            You can of course include all of the optimal ARIA attributes straight away if you wish,
+                            including indicating which tab should be active by default:
+                        </p>
+                        <pre><code class="lang-html">&lt;div role="tablist" aria-orientation="horizontal" aria-label="Fruits"&gt;
+    &lt;div role="tab" tabindex="-1" aria-controls="panel-1" id="tab-1"&gt;
+        Apple
+    &lt;/div&gt;
+    &lt;div role="tab" tabindex="0" aria-selected="true" aria-controls="panel-2" id="tab-2"&gt;
+        Orange
+    &lt;/div&gt;
+    &lt;div role="tab" tabindex="-1" aria-controls="panel-3" id="tab-3"&gt;
+        Pear
+    &lt;/div&gt;
+&lt;div&gt;
+
+&lt;div role="tabpanel" aria-labelledby="tab-1" hidden="hidden" id="panel-1"&gt;...&lt;/div&gt;
+&lt;div role="tabpanel" aria-labelledby="tab-2" id="panel-2"&gt;...&lt;/div&gt;
+&lt;div role="tabpanel" aria-labelledby="tab-3" hidden="hidden" id="panel-3"&gt;...&lt;/div&gt;
+</code></pre>
+                    </div>
+                </section>
+                <section>
+                    <div class="tile" id="options">
+                        <h2>Options</h2>
+                        <p>
+                            Most of the functionality is assumed from the included ARIA attributes in your HTML,
+                            but some basic options are also available:
+                        </p>
+                        <dl>
+                            <dt>delay: <code>number</code></dt>
+                            <dd>
+                                Delay in milliseconds before showing tab(s) from user interaction<br />Default:
+                                <code>0</code>
+                            </dd>
+                            <dt>deletable: <code>Boolean</code></dt>
+                            <dd>
+                                Allow tab deletion via the keyboard - can be overridden per tab by setting
+                                <code>data-deletable="false"</code><br />Default:
+                                <code>false</code>
+                            </dd>
+                            <dt>focusableTabs: <code>Boolean</code></dt>
+                            <dd>
+                                Make all tabs focusable in the normal tabbing order (by setting a
+                                <code>tabindex</code> on them), instead of just one<br />Default:
+                                <code>false</code>
+                            </dd>
+                            <dt>focusablePanels: <code>Boolean</code></dt>
+                            <dd>
+                                Make all tab panels focusable in the normal tabbing order (by setting a
+                                <code>tabindex</code> on them)<br />Default:
+                                <code>true</code>
+                            </dd>
+                            <dt>arrowActivation: <code>Boolean</code></dt>
+                            <dd>
+                                Enable all arrow keys for moving focus between the tabs<br />Default:
+                                <code>false</code>
+                            </dd>
+                            <dt>allArrows: <code>Boolean</code></dt>
+                            <dd>
+                                Enable all arrow keys for moving focus, instead of checking the
+                                <code>aria-orientation</code> value (left and up for previous, right and down for
+                                next)<br />Default:
+                                <code>false</code>
+                            </dd>
+                            <dt>tabSelector: <code>string</code></dt>
+                            <dd>
+                                the selector to use when initially searching for tab elements; if none are found,
+                                all direct children of the main element will be processed<br />Default:
+                                <code>'[role="tab"]'</code>
+                            </dd>
+                            <dt>tabindex: <code>number</code></dt>
+                            <dd>
+                                Value to use when setting tabs or panels to be part of the page's tabbing order<br />Default:
+                                <code>0</code>
+                            </dd>
+                            <dt>onOpen: <code>Function</code></dt>
+                            <dd>
+                                Callback each time a tab opens<br />Default:
+                                <code>(panel, tab) => {}</code>
+                            </dd>
+                            <dt>onClose: <code>Function</code></dt>
+                            <dd>
+                                Callback each time a tab closes<br />Default:
+                                <code>(panel, tab) => {}</code>
+                            </dd>
+                            <dt>onDelete: <code>Function</code></dt>
+                            <dd>
+                                Callback when a tab is deleted<br />Default:
+                                <code>(tab) => {}</code>
+                            </dd>
+                            <dt>onReady: <code>Function</code></dt>
+                            <dd>
+                                Callback once ready<br />Default:
+                                <code>(tablist) => {}</code>
+                            </dd>
+                        </dl>
+                        <p>
+                            All component options that accept a
+                            <code>Function</code> will have their context (<code>this</code>) set to include the
+                            full autocomplete API (assuming you use a normal
+                            <code>function: () {}</code> declaration for the callbacks instead of arrow functions).
+                        </p>
+                    </div>
+                    <div class="tile" id="api">
+                        <h2>API</h2>
+                        <p>
+                            The returned <code>AriaTablist</code> instance exposes the following API (which is also
+                            available on the original element's <code>ariaTablist</code> property):
+                        </p>
+                        <dl>
+                            <dt>tabs: <code>HTMLElement[]</code></dt>
+                            <dd>
+                                The tab elements the module currently recognises
+                            </dd>
+                            <dt>panels: <code>HTMLElement[]</code></dt>
+                            <dd>
+                                The panel elements the module currently recognises
+                            </dd>
+                            <dt>options: <code>AriaTablistOptions</code></dt>
+                            <dd>The current options object</dd>
+                            <dt>
+                                open:
+                                <code>(index: number | HTMLElement, focusTab: Boolean = true): void</code>
+                            </dt>
+                            <dd>
+                                Trigger a particular tab to open (by index, or element), even if disabled
+                            </dd>
+                            <dt>
+                                close:
+                                <code>(index: number | HTMLElement, focusTab: Boolean = false): void</code>
+                            </dt>
+                            <dd>
+                                Trigger a particular tab to close (by index, or element), even if disabled
+                            </dd>
+                            <dt>
+                                delete:
+                                <code>(index: number | HTMLElement): void</code>
+                            </dt>
+                            <dd>
+                                Delete a particular tab and its corresponding panel (if deletable)
+                            </dd>
+                            <dt>destroy: <code>Function</code></dt>
+                            <dd>
+                                Destroy the module - does not remove the elements from the DOM
+                            </dd>
+                        </dl>
+                    </div>
+                </section>
+                <a class="button" href="https://www.github.com/mynamesleon/aria-tablist">On GitHub</a>
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        <script>
+            hljs.initHighlightingOnLoad();
+        </script>
+    </body>
+</html>

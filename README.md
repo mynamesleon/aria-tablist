@@ -5,17 +5,17 @@
 
 Dependency-free plain JavaScript module for WCAG compliant tablists. Also great for accordions.
 
-[Try out the examples](https://mynamesleon.github.io/aria-tablist/examples/)
+[Try out the examples](https://mynamesleon.github.io/aria-tablist/)
 
 Key design goals and features are:
 
 -   **multi and single select modes**
 -   **horizontal and vertical modes**: Adjusts arrow key usage for moving focus between tabs
 -   **progressive enhancement**: Allows for only the tab and panel relationship to be indicated in the DOM, and adds `role` and `aria` attributes automatically as needed
--   **accessibility**: Follows the WCAG spec
+-   **accessibility**: Follows the WCAG spec by default, with options to tweak behaviour
 -   **compatibility**: Broad browser and device support (IE9+)
--   **starting states**: Can use `aria-selected="true"` to indicate which tab(s) should be enabled by default.
--   **deletion**: Can enable tab (and panel) deletion
+-   **starting states**: Can use `aria-selected="true"` or `data-selected="true"` to indicate which tab(s) should be enabled by default.
+-   **deletion**: Can enable tab (and panel) deletion using the delete key
 
 ## Installation / usage
 
@@ -27,13 +27,13 @@ npm install aria-tablist
 
 ```javascript
 import AriaTablist from 'aria-tablist';
-new AriaTablist(document.getElementById('tablist'));
+new AriaTablist(document.getElementById('tablist'), options);
 ```
 
 Or grab the minified JavaScript from unpkg:
 
 ```html
-<script src="https://unpkg.com/aria-tablist/dist/aria-tablist.min.js"></script>
+<script src="https://unpkg.com/aria-tablist"></script>
 ```
 
 The module relies entirely on standard attributes: it sets the `role` on elements if it needs to, `aria-` attributes for indicating behaviour to screen readers, and relies on setting and removing `hidden="hidden"` to toggle element visibility. This means that you can use all of your own class names and styling, and the module won't override them.
@@ -42,11 +42,11 @@ The module relies entirely on standard attributes: it sets the `role` on element
 
 When the module is called on an element, the following steps are taken:
 
-1. The module will look for elements with `role="tab"` set.
+1. The module will search for `tab` elements using the `tabSelector` option (`'[role="tab"]'` by default).
 2. If none are found, all direct children will be processed.
 3. For each assumed `tab`, the module will check for a matching `tabpanel` by:
-    1. Checking for an `aria-controls` attribute on the `tab`, and searching for an element with a matching `id`.
-    2. If the `tab` has an `id`, searching for an element with an `aria-labelledby` attribute that matches that `id`.
+    1. Checking for an `aria-controls` or `data-controls` attribute on the `tab`, and searching for an element with a matching `id`.
+    2. If the `tab` has an `id`, searching for an element with an `aria-labelledby` or `data-labelledby` attribute that matches that `id`.
 4. For any tabs that were processed where a matching panel was **not** found, if they had `role="tab"` set, the `role` attribute will be removed to prevent confusion to screen reader users.
 5. The found tabs and associated panels will then have the relevant `role` and `aria-` attributes set automatically.
 
@@ -59,9 +59,9 @@ This means your HTML only needs to indicate the relationship between the tabs an
     <div id="tab-3">Panel 3</div>
 </div>
 
-<div aria-labelledby="tab-1">...</div>
-<div aria-labelledby="tab-2">...</div>
-<div aria-labelledby="tab-3">...</div>
+<div data-labelledby="tab-1">...</div>
+<div data-labelledby="tab-2">...</div>
+<div data-labelledby="tab-3">...</div>
 
 <script>
     new AriaTablist(document.getElementById('tabs'));
@@ -73,15 +73,15 @@ So if you need to cater for users without JavaScript, or if the JavaScript fails
 You can of course include all of the optimal ARIA attributes straight away if you wish, including indicating which tab should be active by default:
 
 ```html
-<div id="tabs" role="tablist" aria-label="Tabs">
+<div id="tabs" role="tablist" aria-label="Fruits">
     <div role="tab" tabindex="-1" aria-controls="panel-1" id="tab-1">
-        Panel 1
+        Apple
     </div>
     <div role="tab" tabindex="0" aria-selected="true" aria-controls="panel-2" id="tab-2">
-        Panel 2
+        Orange
     </div>
     <div role="tab" tabindex="-1" aria-controls="panel-3" id="tab-3">
-        Panel 3
+        Pear
     </div>
 </div>
 
@@ -94,57 +94,69 @@ You can of course include all of the optimal ARIA attributes straight away if yo
 
 Most of the functionality is assumed from the included ARIA attributes in your HTML (see the [examples](https://mynamesleon.github.io/aria-tablist/examples/)). The remaining available options and their defaults are:
 
-```javascript
+```typescript
 {
     /**
-     * @description delay in milliseconds before showing tab(s) from user interaction
+     * delay in milliseconds before showing tab(s) from user interaction
      */
-    delay: 0,
+    delay: number = 0;
 
     /**
-     * @description allow tab deletion - can be overridden per tab by setting data-deletable="false"
+     * allow tab deletion via the keyboard - can be overridden per tab by setting `data-deletable="false"`
      */
-    deletable: false,
+    deletable: boolean = false;
 
     /**
-     * @description make all tabs focusable in the page's tabbing order (by setting a `tabindex` on them), instead of just 1
+     * make all tabs focusable in the page's tabbing order (by setting a `tabindex` on them), instead of just 1
      */
-    focusableTabs: false,
+    focusableTabs: boolean = false;
 
     /**
-     * @description make all tab panels focusable in the page's tabbing order (by setting a `tabindex` on them)
+     * make all tab panels focusable in the page's tabbing order (by setting a `tabindex` on them)
      */
-    focusablePanels: true,
+    focusablePanels: boolean = true;
 
     /**
-     * @description activate a tab when it receives focus from using the arrow keys
+     * activate a tab when it receives focus from using the arrow keys
      */
-    arrowActivation: false,
+    arrowActivation: boolean = false;
 
     /**
-     * @description value to use when setting tabs or panels to be part of the page's tabbing order
+     * enable all arrow keys for moving focus, instead of horizontal or vertical arrows based on `aria-orientation` attribute
+     * (left and up for previous, right and down for next)
      */
-    tabindex: 0,
+    allArrows: boolean = false;
 
     /**
-     * @description callback each time a tab opens
+     * the selector to use when initially searching for tab elements;
+     * if none are found, all direct children of the main element will be processed
      */
-    onOpen: (panel, tab) => {},
+    tabSelector: string = '[role="tab"]';
 
     /**
-     * @description callback each time a tab closes
+     * value to use when setting tabs or panels to be part of the page's tabbing order
      */
-    onClose: (panel, tab) => {},
+    tabindex: number | string = 0;
 
     /**
-     * @description callback when a tab is deleted
+     * callback each time a tab opens
      */
-    onDelete: (tab) => {},
+    onOpen: (panel: HTMLElement, tab: HTMLElement) => void;
 
     /**
-     * @description callback once ready
+     * callback each time a tab closes
      */
-    onReady: (tablist) => {}
+    onClose: (panel: HTMLElement, tab: HTMLElement) => void;
+
+    /**
+     * callback when a tab is deleted
+     */
+    onDelete: (tab: HTMLElement) => void;
+
+    /**
+     * callback once ready
+     */
+    onReady: (tablist: HTMLElement) => void;
 }
 ```
 
@@ -157,42 +169,37 @@ The returned `AriaTablist` class instance exposes the following API (which is al
 ```typescript
 {
     /**
-     * @description the tab elements the module currently recognises
+     * the tab elements the module currently recognises
      */
-    tabs: Element[];
+    tabs: HTMLElement[];
 
     /**
-     * @description the panel elements the module currently recognises
+     * the panel elements the module currently recognises
      */
-    panels: Element[];
+    panels: HTMLElement[];
 
     /**
-     * @description the current options object
+     * the current options object
      */
-    options: Object;
+    options: AriaTablistOptions;
 
     /**
-     * @description trigger a particular tab to open (even if disabled)
-     * @param {Number|Element} index - tab index, or tab element
-     * @param {Boolean} [focusTab=true] - move focus to the tab before opening
+     * trigger a particular tab to open (even if disabled)
      */
-    open(index: Number|Element, focusTab: Boolean = true): void;
+    open(index: number | HTMLElement, focusTab: boolean = true): void;
 
     /**
-     * @description trigger a particular tab to close (even if disabled)
-     * @param {Number|Element} index - tab index, or tab element
-     * @param {Boolean} [focusTab=false] - move focus to the tab before closing
+     * trigger a particular tab to close (even if disabled)
      */
-    close(index: Number|Element, focusTab: Boolean = false): void;
+    close(index: number | HTMLElement, focusTab: boolean = false): void;
 
     /**
-     * @description delete a particular tab and its corresponding panel (if deletable)
-     * @param {Number|Element} index - tab index, or tab element
+     * delete a particular tab and its corresponding panel (if deletable)
      */
-    delete(index: Number|Element): void;
+    delete(index: number | HTMLElement): void;
 
     /**
-     * @description destroy the module - does not remove the elements from the DOM
+     * destroy the module - does not remove the elements from the DOM
      */
     destroy(): void;
 }
