@@ -28,8 +28,6 @@ export function setAttribute(element: Element, attribute: string, value: any) {
  */
 export function removeAttributes(element: Element, attr: string) {
     if (element && attr && element.removeAttribute) {
-        for (let i = 0, a = attr.split(' '), l = a.length; i < l; i += 1) {
-            a[i] && element.removeAttribute(a[i]);
-        }
+        attr.split(' ').forEach((a: string) => a && element.removeAttribute(a));
     }
 }

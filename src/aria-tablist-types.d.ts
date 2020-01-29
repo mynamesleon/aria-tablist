@@ -1,26 +1,26 @@
-export interface AriaTablistOptions {
-    delay?: Number;
-    tabindex?: number;
-    deletable?: Boolean;
-    focusableTabs?: Boolean;
-    focusablePanels?: Boolean;
-    arrowActivation?: Boolean;
-    allArrows?: Boolean;
+export interface IAriaTablistOptions {
+    delay?: number;
+    tabindex?: number | string;
+    deletable?: boolean;
+    focusableTabs?: boolean;
+    focusablePanels?: boolean;
+    arrowActivation?: boolean;
+    allArrows?: boolean;
     tabSelector?: string;
-    onOpen?: Function;
-    onClose?: Function;
-    onDelete?: Function;
-    onReady?: Function;
+    onOpen?(panel: HTMLElement, tab: HTMLElement): void;
+    onClose?(panel: HTMLElement, tab: HTMLElement): void;
+    onDelete?(tab: HTMLElement): void;
+    onReady?(tablist: HTMLElement): void;
 }
 
-export interface AriaTablistApi {
+export interface IAriaTablistApi {
     tabs: HTMLElement[];
     panels: HTMLElement[];
-    options: AriaTablistOptions;
-    open(index: number | HTMLElement, setFocus?: Boolean): void;
-    close(index: number | HTMLElement, setFocus?: Boolean): void;
+    options: IAriaTablistOptions;
+    open(index: number | HTMLElement, setFocus?: boolean): void;
+    close(index: number | HTMLElement, setFocus?: boolean): void;
     delete(index: number | HTMLElement): void;
     destroy(): void;
 }
 
-declare function AriaTablist(element: HTMLElement, options?: AriaTablistOptions): AriaTablistApi;
+declare function AriaTablist(element: HTMLElement, options?: IAriaTablistOptions): IAriaTablistApi;

@@ -1,13 +1,13 @@
 ﻿import { TablistApi } from './tablist-api';
 import { TablistOptions } from './tablist-options';
-import { AriaTablistOptions } from './aria-tablist-types';
+import { IAriaTablistOptions, IAriaTablistApi } from './aria-tablist-types';
 import { KEYS, DIRECTION, TAB_INDEX_PROP, TABLIST_STORAGE_PROP } from './tablist-constants';
 import { preventDefault, getAttribute, setAttribute, removeAttributes } from './tablist-helpers';
 
 /**
  * incremental index used for element ID generation
  */
-let appIndex = 0;
+let appIndex: number = 0;
 
 /**
  * create a Tablist
@@ -17,17 +17,17 @@ export class Tablist {
     tabTimer: number;
     multiple: Boolean;
     tablist: HTMLElement;
-    options: AriaTablistOptions;
+    options: IAriaTablistOptions;
     tabs: HTMLElement[] = [];
     panels: HTMLElement[] = [];
 
-    constructor(element: HTMLElement, options?: AriaTablistOptions) {
+    constructor(element: HTMLElement, options?: IAriaTablistOptions) {
         if (!element || element.nodeType !== 1) {
             return;
         }
 
         // if instance already exists for this element, destroy and re-make
-        const storedApi = element[TABLIST_STORAGE_PROP];
+        const storedApi: IAriaTablistApi = element[TABLIST_STORAGE_PROP];
         if (storedApi && typeof storedApi.destroy === 'function') {
             storedApi.destroy();
         }
@@ -80,7 +80,7 @@ export class Tablist {
      * @param index used for ID generation
      */
     setCoreAttributes(tab: HTMLElement, panel: HTMLElement, index: number) {
-        const tabindex = this.options.tabindex || '0';
+        const tabindex: number | string = this.options.tabindex || '0';
 
         // add to page tabbing order
         if (this.options.focusableTabs) {
@@ -406,7 +406,7 @@ export class Tablist {
         }
 
         // make focusable and indicate selected
-        const tabindex = this.options.tabindex || '0';
+        const tabindex: number | string = this.options.tabindex || '0';
         setAttribute(tab, 'tabindex', tabindex);
         setAttribute(tab, 'aria-selected', 'true');
 
@@ -451,7 +451,7 @@ export class Tablist {
         // ensure tabindex gets set even when disabled, for programmatic focusing
         // and in case options change between activations
         const focusableTabs: Boolean = this.options.focusableTabs;
-        const tabindex = focusableTabs ? this.options.tabindex || '0' : '-1';
+        const tabindex: number | string = focusableTabs ? this.options.tabindex || '0' : '-1';
         setAttribute(tab, 'tabindex', tabindex);
 
         // allow force closing (used on other tabs in single-select mode)
@@ -625,8 +625,7 @@ export class Tablist {
             this.addListenersToTab(index);
             // determine if any tabs need to be activated to begin with
             const isSelected: Boolean =
-                getAttribute(tab, 'aria-selected') === 'true' ||
-                getAttribute(tab, 'data-selected') === 'true';
+                getAttribute(tab, 'aria-selected') === 'true' || getAttribute(tab, 'data-selected') === 'true';
             if (isSelected && (this.multiple || !toActivate.length)) {
                 toActivate.push(tab);
             }

@@ -1,12 +1,12 @@
 import { Tablist } from './tablist-core';
-import { AriaTablistOptions } from './aria-tablist-types';
+import { IAriaTablistOptions } from './aria-tablist-types';
 import { TABLIST_STORAGE_PROP } from './tablist-constants';
 
 // generate Tablist API to expose to users
 export class TablistApi {
     tabs: HTMLElement[];
     panels: HTMLElement[];
-    options: AriaTablistOptions;
+    options: IAriaTablistOptions;
 
     // provide Tablist instance
     constructor(instance: Tablist) {
