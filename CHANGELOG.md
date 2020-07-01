@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2020-07-01
+
+### Added
+
+-   TypeScript definitions added to dist folder for npm module
+
 ## [1.2.0] - 2020-01-29
 
 ### Added

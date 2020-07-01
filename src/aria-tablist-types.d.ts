@@ -24,3 +24,5 @@ export interface IAriaTablistApi {
 }
 
 declare function AriaTablist(element: HTMLElement, options?: IAriaTablistOptions): IAriaTablistApi;
+
+export default AriaTablist;
