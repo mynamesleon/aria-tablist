@@ -1,10 +1,11 @@
 {
     "name": "aria-tablist",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Dependency-free plain JavaScript module for WCAG compliant tablists",
     "main": "dist/aria-tablist.min.js",
+    "types": "dist/index.d.ts",
     "scripts": {
-        "build": "webpack"
+        "build": "webpack && node copy-types.js"
     },
     "repository": {
         "type": "git",
@@ -20,7 +21,7 @@
         "accordion"
     ],
     "files": [
-        "dist/*.js"
+        "dist"
     ],
     "browserslist": [
         ">0.1%",
@@ -39,10 +40,10 @@
     },
     "homepage": "https://github.com/mynamesleon/aria-tablist#readme",
     "devDependencies": {
-        "ts-loader": "^6.2.1",
-        "typescript": "^3.7.4",
-        "webpack": "^4.41.5",
-        "webpack-cli": "^3.3.10"
+        "ts-loader": "^6.2.2",
+        "typescript": "^3.9.6",
+        "webpack": "^4.43.0",
+        "webpack-cli": "^3.3.12"
     },
     "dependencies": {}
 }
