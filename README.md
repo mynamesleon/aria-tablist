@@ -27,7 +27,7 @@ npm install aria-tablist
 
 ```javascript
 import AriaTablist from 'aria-tablist';
-new AriaTablist(document.getElementById('tablist'), options);
+AriaTablist(document.getElementById('tablist'), options);
 ```
 
 Or grab the minified JavaScript from unpkg:
@@ -64,7 +64,7 @@ This means your HTML only needs to indicate the relationship between the tabs an
 <div data-labelledby="tab-3">...</div>
 
 <script>
-    new AriaTablist(document.getElementById('tabs'));
+    AriaTablist(document.getElementById('tabs'));
 </script>
 ```
 
